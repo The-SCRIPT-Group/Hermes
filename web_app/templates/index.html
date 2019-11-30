@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+    <form class="w3-xlarge" method="post" action="/get-qr" style="margin-top: 10%">
+        <label>
+            <input type="text" class="w3-input w3-hover-red w3-round-xxlarge" name="username" placeholder="username"
+                   style="text-align: center; width: 50%; border: hidden; margin-right: auto; margin-left: auto" required>
+            <br>
+        </label>
+        <label>
+            <input type="password" class="w3-input w3-hover-red w3-round-xxlarge" name="password" placeholder="password"
+                   style="text-align: center; width: 50%; border: hidden; margin-right: auto; margin-left: auto" required>
+            <br>
+        </label>
+        <input class="w3-button w3-red w3-round-xxlarge" type="submit" value="LOGIN" style="width: 130px">
+    </form>
+{% endblock %}

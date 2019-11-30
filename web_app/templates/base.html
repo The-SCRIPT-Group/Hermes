@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hermes</title>
+
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+</head>
+<body class="w3-black">
+<div class="w3-container w3-center">
+    <img src="{{ url_for(endpoint='static', filename='images/LogoTransparent.png') }}" alt="SCRIPT"
+         style="width: 50%; height: auto">
+</div>
+<div class="w3-container">
+    {% block full_page_content %}
+        <div class="w3-row">
+            <div class="w3-col l2 w3-hide-small"><p></p></div>
+            <div class="w3-col l8 w3-center">
+                {% block page_content %}{% endblock %}
+            </div>
+        </div>
+    {% endblock %}
+</div>
+</body>
+</html>

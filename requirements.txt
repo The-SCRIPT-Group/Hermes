@@ -1,0 +1,5 @@
+waitress
+flask
+requests
+selenium
+emoji

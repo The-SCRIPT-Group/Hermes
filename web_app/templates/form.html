@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+    <form class="w3-xlarge" method="post" action="/send" style="margin-top: 10%">
+        <label>
+            <select class="w3-select w3-hover-red w3-round-xxlarge" name="table"
+                    style="text-align: center; width: 70%; border: hidden; margin-right: auto; margin-left: auto">
+                {% for event in events %}
+                    <option value="{{ event }}">{{ event }}</option>
+                {% endfor %}
+            </select>
+            <br>
+            <br>
+        </label>
+        <label>
+            <input type="text" class="w3-input w3-hover-red w3-round-xxlarge" name="ids"
+                   placeholder="Enter all the user ids seperated by space; just enter 'all' to send to all"
+                   style="text-align: center; width: 70%; border: hidden; margin-right: auto; margin-left: auto"
+                   required>
+            <br>
+        </label>
+        <label>
+            <textarea class="w3-input w3-hover-red w3-round-xxlarge" name="message"
+                      placeholder="Type your message here! You can use emojis in your message as well :)"
+                      style="text-align: center; width: 70%; border: hidden; margin-right: auto; margin-left: auto"
+                      required></textarea>
+            <br>
+        </label>
+        <input class="w3-button w3-red w3-round-xxlarge" type="submit" value="SEND" style="width: 130px">
+    </form>
+{% endblock %}

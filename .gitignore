@@ -1,0 +1,6 @@
+*.iml
+.idea
+*.log
+*.json
+*.exe
+venv
