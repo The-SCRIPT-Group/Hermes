@@ -8,7 +8,7 @@ from flask import Flask, render_template, session, request, redirect, url_for
 from requests import get, post
 from selenium.common.exceptions import TimeoutException
 
-from web_app import whatsapp as meow
+from web_app import whatsapp as wa
 
 app = Flask(__name__)
 app.secret_key = 'messenger_of_the_gods'
@@ -73,7 +73,7 @@ def login():
 @app.route('/qr')
 def qr():
     print('started driver session for ' + session['username'])
-    browser[session['id']], qr_img = meow.startWebSession(data['browser'], data['driver-path'])
+    browser[session['id']], qr_img = wa.startWebSession(data['browser'], data['driver-path'])
     return render_template('qr.html', qr=qr_img)
 
 
@@ -107,19 +107,19 @@ def send():
 
     try:
         # Wait till the text box is loaded onto the screen
-        meow.waitTillElementLoaded(browser[session['id']], '/html/body/div[1]/div/div/div[4]/div/div/div[1]')
+        wa.waitTillElementLoaded(browser[session['id']], '/html/body/div[1]/div/div/div[4]/div/div/div[1]')
 
         # Get data from our API
         if request.form['ids'] == 'all':
-            names, numbers = meow.getData(data['table-api-url'] + request.form['table'], data['api-token'], 'all')
+            names, numbers = wa.getData(data['table-api-url'] + request.form['table'], data['api-token'], 'all')
         else:
-            names, numbers = meow.getData(data['table-api-url'] + request.form['table'], data['api-token'],
+            names, numbers = wa.getData(data['table-api-url'] + request.form['table'], data['api-token'],
                                           list(map(lambda x: int(x), request.form['ids'].split(' '))))
 
         # Send messages to all entries in file
         for num, name in zip(numbers, names):
             try:
-                messages_sent_to.append(meow.sendMessage(num, name, msg, browser[session['id']], time=30))
+                messages_sent_to.append(wa.sendMessage(num, name, msg, browser[session['id']], time=30))
             except TimeoutException:
                 print("chat could not be loaded for", name)
                 messages_not_sent_to.append(name)
