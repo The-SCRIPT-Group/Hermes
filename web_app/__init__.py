@@ -58,7 +58,7 @@ def home():
 
 
 # login user and retrieve qr
-@app.route('/get-qr', methods=['POST'])
+@app.route('/login', methods=['POST'])
 def login():
     if request.form['username'] == 'tsg' and request.form['password'] == 'haveli':
         session['username'] = request.form['username']
@@ -82,8 +82,9 @@ def qr():
 @app.route('/form')
 def form():
     return render_template('form.html', events=json.loads(
-        get('https://thescriptgroup.herokuapp.com/api/events', headers={'Authorization': data['api-token']}
-            ).text)['response'])
+        get(
+            'https://thescriptgroup.herokuapp.com/api/events', headers={'Authorization': data['api-token']}
+        ).text)['response'])
 
 
 # send messages on whatsapp
@@ -133,11 +134,19 @@ def send():
 
     finally:
         # first \n just to make sure the paste content is never empty
-        sent_list = dogbin('\n' + '\n'.join(messages_sent_to))
-        not_sent_list = dogbin('\n' + '\n'.join(messages_not_sent_to))
+        sent_list = dogbin('Messages sent to :\n' + '\n'.join(messages_sent_to))
+        not_sent_list = dogbin('Messages not sent to :\n' + '\n'.join(messages_not_sent_to))
         # Send the url to dogbin on the chat
-        return f"""
-                The list of names to whom the message was sent can be found <a href="{sent_list}">here</a>
-                <br><br>
-                The list of names to whom the message could not be sent can be found <a href="{not_sent_list}">here</a>
-               """
+        return render_template('success.html', sent_list=sent_list, not_sent_list=not_sent_list)
+
+
+# for testing purpose
+@app.route('/begone')
+def begone():
+    return render_template('begone.html')
+
+
+# for testing purpose
+@app.route('/success')
+def success():
+    return render_template('success.html', sent_list='/', not_sent_list='/')

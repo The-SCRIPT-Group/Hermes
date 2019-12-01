@@ -1,17 +1,18 @@
 {% extends "base.html" %}
 
 {% block page_content %}
-    <form class="w3-xlarge" method="post" action="/get-qr" style="margin-top: 10%">
-        <label>
-            <input type="text" class="w3-input w3-hover-red w3-round-xxlarge" name="username" placeholder="username"
-                   style="text-align: center; width: 50%; border: hidden; margin-right: auto; margin-left: auto" required>
-            <br>
-        </label>
-        <label>
-            <input type="password" class="w3-input w3-hover-red w3-round-xxlarge" name="password" placeholder="password"
-                   style="text-align: center; width: 50%; border: hidden; margin-right: auto; margin-left: auto" required>
-            <br>
-        </label>
-        <input class="w3-button w3-red w3-round-xxlarge" type="submit" value="LOGIN" style="width: 130px">
-    </form>
+    <div class="center" style="max-width: 330px">
+        <form class="form" method="post" action="/login">
+            <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+            <label for="inputUsername" class="sr-only">Username</label>
+            <input type="text" id="inputUsername" class="form-control text-center" placeholder="username"
+                   name="username"
+                   required>
+            <label for="inputPassword" class="sr-only">Password</label>
+            <input type="password" id="inputPassword" class="form-control text-center" placeholder="password"
+                   name="password"
+                   required>
+            <button class="btn btn-lg btn-primary btn-block" type="submit" value="Login">Sign in</button>
+        </form>
+    </div>
 {% endblock %}

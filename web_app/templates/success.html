@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block page_content %}
+    <div class="center" style="max-width: 50%">
+        <br>
+        <a class="btn btn-lg btn-primary btn-block center" href="{{ sent_list }}">
+            The list of names to whom the message was sent can be found here
+        </a>
+        <br>
+        <a class="btn btn-lg btn-primary btn-block center" href="{{ not_sent_list }}">
+            The list of names to whom the message could not be sent can be found here
+        </a>
+    </div>
+{% endblock %}

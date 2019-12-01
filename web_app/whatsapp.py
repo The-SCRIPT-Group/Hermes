@@ -73,27 +73,26 @@ def startWebSession(browser_type, driver_path):
 
 
 # Method to send a message to someone
-def sendMessage(num, name, msg, browser, **kwargs):
+def sendMessage(num, name, msg, browser, time=10000):
     api = whatsapp_api + str(num)  # Specific url
     print(api, name)
     browser.get(api)  # Open url in browser
+    print("opened whatsapp")
 
     waitTillElementLoaded(browser, '//*[@id="action-button"]')  # Wait till send message button is loaded
     browser.find_element_by_xpath('//*[@id="action-button"]').click()  # Click on "send message" button
 
     waitTillLinkLoaded(browser, "use WhatsApp Web")  # wait till the link is loaded
     browser.find_element_by_link_text("use WhatsApp Web").click()  # click on link to open chat
+    print('opened chat')
 
     # Wait till the text box is loaded onto the screen, then type out and send the full message
-    if 'time' in kwargs:
-        waitTillElementLoaded(browser, '/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]',
-                              time=kwargs['time'])
-    else:
-        waitTillElementLoaded(browser, '/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]')
+    waitTillElementLoaded(browser, '/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]', time=time)
 
     browser.find_element_by_xpath(
         '/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]'
     ).send_keys(emojize(msg.format(name), use_aliases=True))
+    print('sent')
 
     sleep(3)  # Just so that we can supervise, otherwise it's too fast
 

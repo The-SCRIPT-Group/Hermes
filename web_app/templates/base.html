@@ -1,25 +1,31 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
     <title>Hermes</title>
 
-    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/sign-in/">
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!-- Theme CSS -->
+
+    <!-- Custom styles for this template -->
+    <link href="{{ url_for(endpoint='static', filename='css/main.css') }}" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
 </head>
-<body class="w3-black">
-<div class="w3-container w3-center">
-    <img src="{{ url_for(endpoint='static', filename='images/LogoTransparent.png') }}" alt="SCRIPT"
-         style="width: 50%; height: auto">
-</div>
-<div class="w3-container">
-    {% block full_page_content %}
-        <div class="w3-row">
-            <div class="w3-col l2 w3-hide-small"><p></p></div>
-            <div class="w3-col l8 w3-center">
-                {% block page_content %}{% endblock %}
-            </div>
-        </div>
+
+<body class="text-center">
+<div class="container">
+    <img class="mb-4" src="https://thescriptgroup.files.wordpress.com/2018/10/cropped-logotransp23.png" alt=""
+         height="40%" width="40%">
+    {% block page_content %}
     {% endblock %}
+    <p class="mt-5 mb-3 text-muted">&copy; 2019-2020</p>
 </div>
 </body>
 </html>
