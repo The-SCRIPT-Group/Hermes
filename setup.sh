@@ -44,5 +44,5 @@ rm -v /tmp/cron
 cd - || exit
 git clone https://github.com/The-SCRIPT-Group/Hermes.git
 cd Hermes || exit
-pip install -r requirements.txt
+pip3 install -r requirements.txt
 echo "Setup your configuration file and run the application! (make sure its running on port 5000, should be the default)"
