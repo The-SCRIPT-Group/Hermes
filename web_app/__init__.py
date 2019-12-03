@@ -1,9 +1,7 @@
 import json
 import os
-from base64 import b64encode as bs
-from random import choice
-from string import ascii_letters, digits
 import traceback
+from base64 import b64encode as bs
 
 from emoji import demojize
 from flask import Flask, render_template, session, request, redirect, url_for
@@ -55,7 +53,6 @@ def dogbin(content):
 # homepage - basically come here after he's logged in qrstuff
 @app.route('/')
 def home():
-    print(session)
     return render_template('index.html')
 
 
@@ -67,7 +64,7 @@ def login():
             allow_redirects=False).status_code == 200:
         session['username'] = request.form['username']
         session['credentials'] = bs(creds.encode())
-        session['id'] = ''.join([choice(ascii_letters + digits) for _ in range(32)])
+        print('Logged in ', session['username'])
         return redirect(url_for('qr'))
     else:
         return render_template('begone.html')
@@ -78,7 +75,7 @@ def login():
 @app.route('/qr')
 def qr():
     print('started driver session for ' + session['username'])
-    browser[session['id']], qr_img = meow.startWebSession(data['browser'], data['driver-path'])
+    browser[session['credentials']], qr_img = meow.startWebSession(data['browser'], data['driver-path'])
     return render_template('qr.html', qr=qr_img)
 
 
@@ -113,7 +110,7 @@ def send():
 
     try:
         # Wait till the text box is loaded onto the screen
-        meow.waitTillElementLoaded(browser[session['id']], '/html/body/div[1]/div/div/div[4]/div/div/div[1]')
+        meow.waitTillElementLoaded(browser[session['credentials']], '/html/body/div[1]/div/div/div[4]/div/div/div[1]')
 
         # Get data from our API
         if request.form['ids'] == 'all':
@@ -125,13 +122,13 @@ def send():
         # Send messages to all entries in file
         for num, name in zip(numbers, names):
             try:
-                messages_sent_to.append(meow.sendMessage(num, name, msg, browser[session['id']], time=30))
+                messages_sent_to.append(meow.sendMessage(num, name, msg, browser[session['credentials']], time=30))
             except TimeoutException:
                 print("chat could not be loaded for", name)
                 messages_not_sent_to.append(name)
 
         # Close browser
-        browser[session['id']].close()
+        browser[session['credentials']].close()
         print('closed driver session for ' + session['username'])
 
     except Exception as e:
