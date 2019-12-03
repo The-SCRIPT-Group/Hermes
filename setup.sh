@@ -22,9 +22,9 @@ server {
 
 server {
     listen 443 ssl;
-    server_name hermes.thescriptgroup.in
-    ssl_certificate /etc/letsencrypt/live/hermes.thescriptgroup.in/fullchain.pem
-    ssl_certificate_key /etc/letsencrypt/live/hermes.thescriptgroup.in/privkey.pem
+    server_name hermes.thescriptgroup.in;
+    ssl_certificate /etc/letsencrypt/live/hermes.thescriptgroup.in/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/hermes.thescriptgroup.in/privkey.pem;
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
