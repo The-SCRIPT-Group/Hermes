@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block redirect %}
+    <meta http-equiv="refresh" content="; url = {{ url }}"/>{% endblock %}
+
+{% block page_content %}
+    <h4></h4>
+    <img style="margin-bottom: 10px"
+         src="https://camo.githubusercontent.com/dfc90c7a7bef0ed515007aa2527e9a6abe18f90a/687474703a2f2f66696c652e62616978696e672e6e65742f3230313531312f30383034303862616339353739613037353030633231326534306262393665652e676966"
+         alt="">
+    <hr>
+    <h2>
+        This may take a while, please wait...
+    </h2>
+    <hr>
+{% endblock %}

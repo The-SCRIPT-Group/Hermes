@@ -4,7 +4,7 @@ import traceback
 from base64 import b64encode as bs
 
 from emoji import demojize
-from flask import Flask, render_template, session, request, redirect, url_for
+from flask import Flask, render_template, session, request, url_for
 from requests import get, post
 from selenium.common.exceptions import TimeoutException
 
@@ -65,7 +65,7 @@ def login():
         session['username'] = request.form['username']
         session['credentials'] = bs(creds.encode())
         print('Logged in ', session['username'])
-        return redirect(url_for('qr'))
+        return render_template('loading.html', url=url_for('qr'))
     else:
         return render_template('begone.html')
 
@@ -158,3 +158,9 @@ def begone():
 @app.route('/success')
 def success():
     return render_template('success.html', sent_list='/', not_sent_list='/')
+
+
+# for testing purpose
+@app.route('/loading')
+def loading():
+    return render_template('loading.html', url=url_for('home'))
