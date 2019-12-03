@@ -36,6 +36,7 @@ server {
 }
 EOF
 sudo ln -s /etc/nginx/sites-available/hermes.thescriptgroup.in /etc/nginx/sites-enabled/hermes.thescriptgroup.in
+sudo rm -fv /etc/nginx/sites-{available,enabled}/default
 sudo nginx -s reload
 echo '30 2 * * * /usr/bin/certbot renew --noninteractive --renew-hook "/usr/sbin/nginx -s reload" >> /var/log/le-renew.log' > /tmp/cron
 sudo crontab /tmp/cron
