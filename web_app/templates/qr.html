@@ -1,16 +1,13 @@
 {% extends "base.html" %}
 
+{% block redirect %}
+    <meta http-equiv="refresh" content="2; url = {{ url_for('form') }}"/>{% endblock %}
+
 {% block page_content %}
-    <form class="form" method="get" action="/form">
-        <h2>
-            Scan the QR code from your WhatsApp Application
-        </h2>
-        <hr>
-        <img class="border" style="margin-bottom: 10px" src="{{ qr }}" alt="QR">
-        <hr>
-        <button class="btn btn-lg btn-primary btn-block center" style="max-width: 400px"
-                type="submit" value="Login">
-            Click here once logged into WhatsApp
-        </button>
-    </form>
+    <h2>
+        Scan the QR code from your WhatsApp Application
+    </h2>
+    <hr>
+    <img class="border" style="margin-bottom: 10px" src="{{ qr }}" alt="QR">
+    <hr>
 {% endblock %}

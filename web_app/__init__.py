@@ -83,6 +83,11 @@ def qr():
 @authorized
 @app.route('/form')
 def form():
+    print('fetching form')
+    # wait till the chat search box is loaded, so you know you're logged in
+    meow.waitTillElementLoaded(browser[session['credentials']],
+                               '/html/body/div[1]/div/div/div[3]/div/div[1]/div/label/input')
+    # then display form
     return render_template('form.html', events=json.loads(
         get(
             url='https://thescriptgroup.herokuapp.com/api/events', headers={'Credentials': session['credentials']}
