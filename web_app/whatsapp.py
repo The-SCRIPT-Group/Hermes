@@ -89,7 +89,6 @@ def sendMessage(num, name, msg, browser, time=10000):
 
     # Wait till the text box is loaded onto the screen, then type out and send the full message
     waitTillElementLoaded(browser, '/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]', time=time)
-    sleep(1)
 
     browser.find_element_by_xpath(
         '/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]'
