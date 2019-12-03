@@ -30,8 +30,6 @@ server {
 
     location ^~ / {
         proxy_pass        http://127.0.0.1:5000;
-        proxy_set_header  X-Forwarded-For \$remote_addr;
-        proxy_set_header  Host \$host;
     }
 }
 EOF
