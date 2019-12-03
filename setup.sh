@@ -16,7 +16,7 @@ server {
         root /var/www/html;
     }
     location / {
-        redirect 301 https://hermes.thescriptgroup.in$request_uri;
+        return 301 https://hermes.thescriptgroup.in$request_uri;
     }
 }
 
@@ -32,7 +32,7 @@ server {
         proxy_pass        http://127.0.0.1:5000;
         proxy_set_header  X-Forwarded-For $remote_addr;
         proxy_set_header  Host $host;
-    }    
+    }
 }
 EOF
 sudo ln -s /etc/nginx/sites-available/hermes.thescriptgroup.in /etc/nginx/sites-enabled/hermes.thescriptgroup.in
@@ -40,6 +40,7 @@ sudo nginx -s reload
 echo '30 2 * * * /usr/bin/certbot renew --noninteractive --renew-hook "/usr/sbin/nginx -s reload" >> /var/log/le-renew.log' > /tmp/cron
 sudo crontab /tmp/cron
 rm -v /tmp/cron
+cd - || exit
 git clone https://github.com/The-SCRIPT-Group/Hermes.git
 cd Hermes || exit
 pip install -r requirements.txt
