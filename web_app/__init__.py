@@ -1,7 +1,9 @@
 import json
 import os
+from base64 import b64encode as bs
 from random import choice
-from string import ascii_letters
+from string import ascii_letters, digits
+import traceback
 
 from emoji import demojize
 from flask import Flask, render_template, session, request, redirect, url_for
@@ -24,8 +26,8 @@ else:
             'api-token': os.environ['API_TOKEN'],
             'browser': os.environ['BROWSER'],
             'driver-path': os.environ['DRIVER_PATH'],
-            'table-api-url': os.environ['TABLE_API_URL'],
-            'events-api-url': os.environ['EVENTS_API_URL'],
+            'table-api': os.environ['TABLE_API_URL'],
+            'events-api': os.environ['EVENTS_API_URL'],
         }
     except KeyError:
         print("You don't have configuration JSON or os.environment variables set, go away")
@@ -60,9 +62,12 @@ def home():
 # login user and retrieve qr
 @app.route('/login', methods=['POST'])
 def login():
-    if request.form['username'] == 'tsg' and request.form['password'] == 'haveli':
+    creds = str(request.form['username'] + '|' + request.form['password'])
+    if post(url=data['login-api'], headers={'Credentials': bs(creds.encode())},
+            allow_redirects=False).status_code == 200:
         session['username'] = request.form['username']
-        session['id'] = ''.join([choice(ascii_letters) for _ in range(21)])
+        session['credentials'] = bs(creds.encode())
+        session['id'] = ''.join([choice(ascii_letters + digits) for _ in range(32)])
         return redirect(url_for('qr'))
     else:
         return render_template('begone.html')
@@ -83,8 +88,8 @@ def qr():
 def form():
     return render_template('form.html', events=json.loads(
         get(
-            'https://thescriptgroup.herokuapp.com/api/events', headers={'Authorization': data['api-token']}
-        ).text)['response'])
+            url='https://thescriptgroup.herokuapp.com/api/events', headers={'Credentials': session['credentials']}
+        ).text))
 
 
 # send messages on whatsapp
@@ -112,9 +117,9 @@ def send():
 
         # Get data from our API
         if request.form['ids'] == 'all':
-            names, numbers = meow.getData(data['table-api-url'] + request.form['table'], data['api-token'], 'all')
+            names, numbers = meow.getData(data['table-api'], request.form['table'], session['credentials'], 'all')
         else:
-            names, numbers = meow.getData(data['table-api-url'] + request.form['table'], data['api-token'],
+            names, numbers = meow.getData(data['table-api'], request.form['table'], session['credentials'],
                                           list(map(lambda x: int(x), request.form['ids'].split(' '))))
 
         # Send messages to all entries in file
@@ -131,6 +136,7 @@ def send():
 
     except Exception as e:
         print(e)
+        traceback.print_exc()
 
     finally:
         # first \n just to make sure the paste content is never empty

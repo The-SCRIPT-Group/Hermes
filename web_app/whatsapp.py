@@ -30,12 +30,13 @@ def waitTillLinkLoaded(browser, element):
         print('Timed out waiting for page to load')
 
 
-def getData(url, token, ids):
+def getData(url, table, credentials, ids):
     names_list = []  # List of all names
     numbers_list = []  # List of all numbers
 
     # Get data from our API
-    api_data = json.loads(requests.get(url, headers={'Authorization': token}).text)
+
+    api_data = json.loads(requests.get(url=url, params={'table': table}, headers={'Credentials': credentials}).text)
 
     if ids == 'all':
         ids = list(map(lambda x: x['id'], api_data))
@@ -88,6 +89,7 @@ def sendMessage(num, name, msg, browser, time=10000):
 
     # Wait till the text box is loaded onto the screen, then type out and send the full message
     waitTillElementLoaded(browser, '/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]', time=time)
+    sleep(1)
 
     browser.find_element_by_xpath(
         '/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]'
