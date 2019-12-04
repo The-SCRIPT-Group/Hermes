@@ -17,11 +17,9 @@
     <link href="{{ url_for(endpoint='static', filename='css/main.css') }}" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
-    {% block redirect %}{% endblock %}
-
 </head>
 
-<body class="text-center">
+<body class="text-center" {% block redirect %}{% endblock %}>
 <div class="container">
     <img class="mb-4" src="https://thescriptgroup.files.wordpress.com/2018/10/cropped-logotransp23.png" alt=""
          height="40%" width="40%">

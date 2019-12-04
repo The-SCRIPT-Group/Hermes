@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
-{% block redirect %}
-    <meta http-equiv="refresh" content="2; url = {{ url_for('form') }}"/>{% endblock %}
+{% block redirect %}onload="location.href = '/form'"{% endblock %}
 
 {% block page_content %}
     <h2>

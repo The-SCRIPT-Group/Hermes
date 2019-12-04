@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
-{% block redirect %}
-    <meta http-equiv="refresh" content="; url = {{ url }}"/>{% endblock %}
+{% block redirect %}onload="location.href = '{{ target }}';"{% endblock %}
 
 {% block page_content %}
     <h4></h4>

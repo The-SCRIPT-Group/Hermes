@@ -66,7 +66,7 @@ def login():
         session['username'] = request.form['username']
         session['credentials'] = bs(creds.encode())
         print('Logged in ', session['username'])
-        return render_template('loading.html', url=url_for('qr'))
+        return render_template('loading.html', target='/qr')
     else:
         return render_template('begone.html')
 
