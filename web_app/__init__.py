@@ -24,8 +24,9 @@ else:
             'api-token': os.environ['API_TOKEN'],
             'browser': os.environ['BROWSER'],
             'driver-path': os.environ['DRIVER_PATH'],
-            'table-api': os.environ['TABLE_API_URL'],
-            'events-api': os.environ['EVENTS_API_URL'],
+            'table-api': os.environ['TABLE_API'],
+            'events-api': os.environ['EVENTS_API'],
+            'login-api': os.environ['LOGIN_API'],
         }
     except KeyError:
         print("You don't have configuration JSON or os.environment variables set, go away")
