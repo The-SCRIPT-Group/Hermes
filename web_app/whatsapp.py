@@ -35,7 +35,6 @@ def getData(url, table, credentials, ids):
     numbers_list = []  # List of all numbers
 
     # Get data from our API
-
     api_data = json.loads(requests.get(url=url, params={'table': table}, headers={'Credentials': credentials}).text)
 
     if ids == 'all':

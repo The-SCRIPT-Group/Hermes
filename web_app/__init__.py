@@ -45,10 +45,14 @@ def authorized(func):
 
 
 def dogbin(content):
-    # Save names of who all are gonna get messages in dogbin
-    response = json.loads(post("https://del.dog/documents", content).content.decode())
-    print(response)
-    return 'https://del.dog/{}'.format(response['key'])
+    try:
+        # Save names of who all are gonna get messages in dogbin
+        response = json.loads(post("https://del.dog/documents", content).content.decode())
+        print(response)
+        return 'https://del.dog/{}'.format(response['key'])
+    except Exception as e:
+        print(e)
+        return url_for('home')
 
 
 # homepage - basically come here after he's logged in qrstuff
@@ -84,51 +88,57 @@ def qr():
 @authorized
 @app.route('/form')
 def form():
-    print('fetching form')
     # wait till the chat search box is loaded, so you know you're logged in
     meow.waitTillElementLoaded(browser[session['credentials']],
                                '/html/body/div[1]/div/div/div[3]/div/div[1]/div/label/input')
+    print(session['username'], "logged into whatsapp")
     # then display form
     return render_template('form.html', events=json.loads(
         get(
-            url='https://thescriptgroup.herokuapp.com/api/events', headers={'Credentials': session['credentials']}
+            url=data['events-api'], headers={'Credentials': session['credentials']}
         ).text))
 
 
-# send messages on whatsapp
+# display loading page while sending messages
 @authorized
-@app.route('/send', methods=['POST'])
-def send():
+@app.route('/submit', methods=['POST'])
+def submit_form():
     """
     set the message in the format -
     Hey name :wave:
     <msg taken from form>
     - SCRIPT bot :robot_face:
     """
-    msg = (
+    session['msg'] = (
             'Hey, {} :wave:\n' +
             demojize(request.form['message']) + '\n' +
             '- SCRIPT bot :robot_face:\n'
     )
+    session['table'] = request.form['table']
+    session['ids'] = request.form['ids']
+    return render_template('loading.html', target='/send')
 
+
+# send messages on whatsapp
+@authorized
+@app.route('/send', methods=['POST', 'GET'])
+def send():
     messages_sent_to = []
     messages_not_sent_to = []
 
     try:
-        # Wait till the text box is loaded onto the screen
-        meow.waitTillElementLoaded(browser[session['credentials']], '/html/body/div[1]/div/div/div[4]/div/div/div[1]')
-
         # Get data from our API
-        if request.form['ids'] == 'all':
-            names, numbers = meow.getData(data['table-api'], request.form['table'], session['credentials'], 'all')
+        if session['ids'] == 'all':
+            names, numbers = meow.getData(data['table-api'], session['table'], session['credentials'], 'all')
         else:
-            names, numbers = meow.getData(data['table-api'], request.form['table'], session['credentials'],
-                                          list(map(lambda x: int(x), request.form['ids'].split(' '))))
+            names, numbers = meow.getData(data['table-api'], session['table'], session['credentials'],
+                                          list(map(lambda x: int(x), session['ids'].split(' '))))
 
         # Send messages to all entries in file
         for num, name in zip(numbers, names):
             try:
-                messages_sent_to.append(meow.sendMessage(num, name, msg, browser[session['credentials']], time=30))
+                messages_sent_to.append(
+                    meow.sendMessage(num, name, session['msg'], browser[session['credentials']], time=30))
             except TimeoutException:
                 print("chat could not be loaded for", name)
                 messages_not_sent_to.append(name)
@@ -153,15 +163,3 @@ def send():
 @app.route('/begone')
 def begone():
     return render_template('begone.html')
-
-
-# for testing purpose
-@app.route('/success')
-def success():
-    return render_template('success.html', sent_list='/', not_sent_list='/')
-
-
-# for testing purpose
-@app.route('/loading')
-def loading():
-    return render_template('loading.html', url=url_for('home'))
