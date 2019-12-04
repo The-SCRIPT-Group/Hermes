@@ -29,7 +29,7 @@ server {
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
     location ^~ / {
-        proxy_pass        http://127.0.0.1:5000;
+        proxy_pass        http://127.0.0.1:8080;
     }
 }
 EOF
@@ -43,4 +43,4 @@ cd - || exit
 git clone https://github.com/The-SCRIPT-Group/Hermes.git
 cd Hermes || exit
 pip3 install -r requirements.txt
-echo "Setup your configuration file and run the application! (make sure its running on port 5000, should be the default)"
+echo "Setup your configuration file and run the application! (make sure its running on port 8080, should be the default with waitress)"
