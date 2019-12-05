@@ -5,19 +5,19 @@
         <form class="form" method="post" action="/submit">
             <label for="table" class="sr-only"></label>
             <p>
-                <select class="form-control text-center center" name="table" id="table" style="max-width: 539px">
+                <select class="form-control center text-center" name="table" id="table" style="max-width: 539px">
                     {% for event in events.keys() %}
                         <option value="{{ event }}">{{ events[event] }}</option>
                     {% endfor %}
                 </select>
             </p>
             <label for="ids" class="sr-only"></label>
-            <input type="text" class="form-control text-center center" name="ids" id="ids"
+            <input type="text" class="form-control center" name="ids" id="ids"
                    placeholder="Enter all the user ids seperated by space; just enter 'all' to send to all"
                    style="width: 70%"
                    required>
             <label for="message" class="sr-only"></label>
-            <textarea class="form-control text-center center" name="message" id="message"
+            <textarea class="form-control center" name="message" id="message"
                       placeholder="Type your message here! You can use emojis in your message as well :)"
                       style="width: 70%"
                       required></textarea>
