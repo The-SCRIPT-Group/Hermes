@@ -2,6 +2,7 @@ import json
 import os
 import traceback
 from base64 import b64encode as bs
+from threading import Thread
 
 from emoji import demojize
 from flask import Flask, render_template, session, request, url_for, redirect
@@ -122,38 +123,38 @@ def send():
     meow.waitTillElementLoaded(browser[session['credentials']],
                                '/html/body/div[1]/div/div/div[3]/div/div[1]/div/label/input')
     print(session['username'], "logged into whatsapp")
+    Thread(target=run_whatsapp, kwargs=dict(session)).start()
+    return redirect(url_for('form'))
 
+
+def run_whatsapp(**kwargs):
     messages_sent_to = []
     messages_not_sent_to = []
 
     try:
         # Get data from our API
-        if session['ids'] == 'all':
-            names, numbers = meow.getData(data['table-api'], session['table'], session['credentials'], 'all')
+        if kwargs['ids'] == 'all':
+            names, numbers = meow.getData(data['table-api'], kwargs['table'], kwargs['credentials'], 'all')
         else:
-            names, numbers = meow.getData(data['table-api'], session['table'], session['credentials'],
-                                          list(map(lambda x: int(x), session['ids'].split(' '))))
+            names, numbers = meow.getData(data['table-api'], kwargs['table'], kwargs['credentials'],
+                                          list(map(lambda x: int(x), kwargs['ids'].split(' '))))
 
         # Send messages to all entries in file
         for num, name in zip(numbers, names):
             try:
                 messages_sent_to.append(
-                    meow.sendMessage(num, name, session['msg'], browser[session['credentials']], time=30))
+                    meow.sendMessage(num, name, kwargs['msg'], browser[kwargs['credentials']], time=30))
             except TimeoutException:
                 print("chat could not be loaded for", name)
                 messages_not_sent_to.append(name)
 
         # Close browser
-        browser[session['credentials']].close()
-        print('closed driver session for ' + session['username'])
+        browser[kwargs['credentials']].close()
+        print('closed driver kwargs for ' + kwargs['username'])
 
     except Exception as e:
         print(e)
         traceback.print_exc()
 
     finally:
-        # first \n just to make sure the paste content is never empty
-        sent_list = dogbin('Messages sent to :\n' + '\n'.join(messages_sent_to))
-        not_sent_list = dogbin('Messages not sent to :\n' + '\n'.join(messages_not_sent_to))
-        # Send the url to dogbin on the chat
-        return render_template('success.html', sent_list=sent_list, not_sent_list=not_sent_list)
+        print(kwargs['username'], "done sending messages!")
