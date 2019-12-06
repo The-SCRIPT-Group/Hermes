@@ -1,6 +1,6 @@
-# Hermes
+# Hermes - TSG Communication Application
 
-Web application for The SCRIPT Group to use for sending WhatsApp messages to a bunch of people at once
+Web application for The SCRIPT Group to use for sending WhatsApp messages to a set of event registrants at once
 
 This requires 5 configuration variables set either in your environment, or in a JSON file :<br/>
 `browser` - Browser you want selenium to use. Currently configured only for Google Chrome (chrome) and Mozilla Firefox (firefox)<br/>
@@ -11,7 +11,6 @@ This requires 5 configuration variables set either in your environment, or in a 
 
 The corresponding environment variables are
 ```bash
-API_TOKEN
 BROWSER
 DRIVER_PATH
 LOGIN_API

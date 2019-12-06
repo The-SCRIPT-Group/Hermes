@@ -4,7 +4,7 @@ import traceback
 from base64 import b64encode as bs
 
 from emoji import demojize
-from flask import Flask, render_template, session, request, url_for
+from flask import Flask, render_template, session, request, url_for, redirect
 from requests import get, post
 from selenium.common.exceptions import TimeoutException
 
@@ -70,7 +70,7 @@ def login():
         session['username'] = request.form['username']
         session['credentials'] = bs(creds.encode())
         print('Logged in ', session['username'])
-        return render_template('loading.html', target='/qr')
+        return redirect(url_for('form'))
     else:
         return render_template('begone.html')
 
@@ -88,11 +88,6 @@ def qr():
 @authorized
 @app.route('/form')
 def form():
-    # wait till the chat search box is loaded, so you know you're logged in
-    meow.waitTillElementLoaded(browser[session['credentials']],
-                               '/html/body/div[1]/div/div/div[3]/div/div[1]/div/label/input')
-    print(session['username'], "logged into whatsapp")
-    # then display form
     return render_template('form.html', events=json.loads(
         get(
             url=data['events-api'], headers={'Credentials': session['credentials']}
@@ -116,13 +111,18 @@ def submit_form():
     )
     session['table'] = request.form['table']
     session['ids'] = request.form['ids']
-    return render_template('loading.html', target='/send')
+    return render_template('loading.html', target='/qr')
 
 
 # send messages on whatsapp
 @authorized
 @app.route('/send', methods=['POST', 'GET'])
 def send():
+    # wait till the chat search box is loaded, so you know you're logged in
+    meow.waitTillElementLoaded(browser[session['credentials']],
+                               '/html/body/div[1]/div/div/div[3]/div/div[1]/div/label/input')
+    print(session['username'], "logged into whatsapp")
+
     messages_sent_to = []
     messages_not_sent_to = []
 
@@ -157,9 +157,3 @@ def send():
         not_sent_list = dogbin('Messages not sent to :\n' + '\n'.join(messages_not_sent_to))
         # Send the url to dogbin on the chat
         return render_template('success.html', sent_list=sent_list, not_sent_list=not_sent_list)
-
-
-# for testing purpose
-@app.route('/begone')
-def begone():
-    return render_template('begone.html')
