@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block onload %}{% if msg %}"alert('{{ msg }}')"{% endif %}{% endblock %}
+
 {% block page_content %}
     <div class="center" style="max-width: 800px">
         <form class="form" method="post" action="/submit">
