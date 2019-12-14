@@ -1,5 +1,4 @@
 import json
-from time import sleep
 
 import requests
 from emoji import emojize
@@ -8,6 +7,7 @@ from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
+from time import sleep
 
 whatsapp_api = 'https://api.whatsapp.com/send?phone=91'  # Format of url to open chat with someone
 
@@ -35,7 +35,7 @@ def getData(url, table, credentials, ids):
     numbers_list = []  # List of all numbers
 
     # Get data from our API
-    api_data = json.loads(requests.get(url=url, params={'table': table}, headers={'Credentials': credentials}).text)
+    api_data = json.loads(requests.get(url=url, params={'table': table}, headers=credentials).text)
 
     if ids == 'all':
         ids = list(map(lambda x: x['id'], api_data))

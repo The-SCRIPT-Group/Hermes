@@ -59,21 +59,12 @@ def login():
     if post(url=data['login-api'], headers={'Credentials': bs(creds.encode())},
             allow_redirects=False).status_code == 200:
         session['username'] = request.form['username']
-        session['credentials'] = bs(creds.encode())
+        session['credentials'] = {'Credentials': bs(creds.encode())}
         print('Logged in ', session['username'])
         log(f"<code>{session['username']}</code> logged in")
         return redirect(url_for('form'))
     else:
         return render_template('begone.html')
-
-
-# display qr code to scan
-@authorized
-@app.route('/qr')
-def qr():
-    print('started driver session for ' + session['username'])
-    browser[session['credentials']], qr_img = meow.startWebSession(data['browser'], data['driver-path'])
-    return render_template('qr.html', qr=qr_img)
 
 
 # display message details form
@@ -82,7 +73,7 @@ def qr():
 def form():
     return render_template('form.html', events=json.loads(
         get(
-            url=data['events-api'], headers={'Credentials': session['credentials']}
+            url=data['events-api'], headers=session['credentials']
         ).text))
 
 
@@ -90,20 +81,66 @@ def form():
 @authorized
 @app.route('/submit', methods=['POST'])
 def submit_form():
-    """
-    set the message in the format -
-    Hey name :wave:
-    <msg taken from form>
-    - SCRIPT bot :robot_face:
-    """
-    session['msg'] = (
-            'Hey, {} :wave:\n' +
-            demojize(request.form['message']) + '\n' +
-            '- SCRIPT bot :robot_face:\n'
+    if 'whatsapp' not in request.form and 'sendgrid' not in request.form:
+        return render_template('begone.html')
+
+    if 'sendgrid' in request.form:
+        params = dict(request.form)
+        params['credentials'] = session['credentials']
+        params['username'] = session['username']
+        Thread(target=send_mail, kwargs=params).start()
+
+    if 'whatsapp' in request.form:
+        # set message in correct format to send
+        session['msg'] = (
+                "Hey, {} :wave:\n" +
+                demojize(request.form['content']) + "\n" +
+                "- SCRIPT bot :robot_face:\n"
+        )
+        session['table'] = request.form['table']
+        session['ids'] = request.form['ids']
+        return render_template('loading.html', target='/qr')
+
+    return render_template(
+        'form.html', msg="Sending Messages!",
+        events=json.loads(get(url=data['events-api'], headers=session['credentials']).text)
     )
-    session['table'] = request.form['table']
-    session['ids'] = request.form['ids']
-    return render_template('loading.html', target='/qr')
+
+
+# send emails
+def send_mail(**kwargs):
+    res = post(url=data['email-api'], data=kwargs, headers=kwargs['credentials'])
+    print(res, res.text)
+
+    # Get data from our API
+    if kwargs['ids'] == 'all':
+        names = meow.getData(data['table-api'], kwargs['table'], kwargs['credentials'], 'all')[0]
+    else:
+        names = meow.getData(
+            data['table-api'],
+            kwargs['table'], kwargs['credentials'],
+            list(map(lambda x: int(x), kwargs['ids'].split(' ')))
+        )[0]
+
+    newline = '\n'
+    with open('sendgrid_list.txt', 'w') as file:
+        file.write(f"E-Mails sent to :\n{newline.join(names)}")
+
+    tg.send_chat_action(data['log_channel'], 'upload document')
+    log(f"List of people who received E-Mails during run by user <code>{kwargs['username']}</code>",
+        "sendgrid_list.txt")
+    os.remove('sendgrid_list.txt')
+
+    print(kwargs['username'], "Done sending e-mails")
+
+
+# display qr code to scan
+@authorized
+@app.route('/qr')
+def qr():
+    print('started driver session for ' + session['username'])
+    browser[session['username']], qr_img = meow.startWebSession(data['browser'], data['driver-path'])
+    return render_template('qr.html', qr=qr_img)
 
 
 # send messages on whatsapp
@@ -111,14 +148,17 @@ def submit_form():
 @app.route('/send', methods=['POST', 'GET'])
 def send():
     # wait till the chat search box is loaded, so you know you're logged in
-    meow.waitTillElementLoaded(browser[session['credentials']],
+    meow.waitTillElementLoaded(browser[session['username']],
                                '/html/body/div[1]/div/div/div[3]/div/div[1]/div/label/input')
     print(session['username'], "logged into whatsapp")
+
+    # send messages
     Thread(target=run_whatsapp, kwargs=dict(session)).start()
-    return render_template('form.html', msg="Sending WhatsApp Messages!", events=json.loads(
-        get(
-            url=data['events-api'], headers={'Credentials': session['credentials']}
-        ).text))
+
+    return render_template(
+        'form.html', msg="Sending Messages!",
+        events=json.loads(get(url=data['events-api'], headers=session['credentials']).text)
+    )
 
 
 def run_whatsapp(**kwargs):
@@ -137,13 +177,13 @@ def run_whatsapp(**kwargs):
         for num, name in zip(numbers, names):
             try:
                 messages_sent_to.append(
-                    meow.sendMessage(num, name, kwargs['msg'], browser[kwargs['credentials']], time=30))
+                    meow.sendMessage(num, name, kwargs['msg'], browser[kwargs['username']], time=30))
             except TimeoutException:
                 print("chat could not be loaded for", name)
                 messages_not_sent_to.append(name)
 
         # Close browser
-        browser[kwargs['credentials']].close()
+        browser[kwargs['username']].close()
         print('closed driver for ' + kwargs['username'])
 
     except Exception as e:
@@ -152,15 +192,15 @@ def run_whatsapp(**kwargs):
 
     finally:
         newline = '\n'
-        with open('result.txt', 'w') as file:
+        with open('whatsapp_list.txt', 'w') as file:
             file.write(
                 f"Messages sent to :\n{newline.join(messages_sent_to)}\n\n"
                 f"Messages not sent to :\n{newline.join(messages_not_sent_to)}")
 
         tg.send_chat_action(data['log_channel'], 'upload document')
-        log(f"List of people who received and didn't receive WhatsApp during run by user "
+        log(f"List of people who received and didn't receive WhatsApp messages during run by user "
             f"<code>{kwargs['username']}</code>",
-            "result.txt")
-        os.remove('result.txt')
+            "whatsapp_list.txt")
+        os.remove('whatsapp_list.txt')
 
         print(kwargs['username'], "done sending messages!")
