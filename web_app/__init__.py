@@ -24,7 +24,7 @@ else:
     print("You don't have configuration JSON, go away")
     exit(1)
 
-tg = TG(data['telebot_api_key'])
+tg = TG(data['telebot_api_key'])  # object used to log data to telegram
 
 
 # log messages to tg channel
@@ -35,10 +35,10 @@ def log(message, doc=None):
         tg.send_message(data['log_channel'], f"<b>Hermes</b> :\n{message}")
 
 
-# wrapper; only execute function if user is logged in or request from qrstuff
-def authorized(func):
+# wrapper; only execute function if user is logged in
+def login_required(func):
     def inner(*args, **kwargs):
-        if 'username' in session:
+        if 'username' in session:  # since on login the username is set as a session variable
             return func(*args, **kwargs)
         else:
             return render_template('begone.html')
@@ -46,96 +46,103 @@ def authorized(func):
     return inner
 
 
-# homepage - basically come here after he's logged in qrstuff
+# homepage - shows login details
 @app.route('/')
 def home():
     return render_template('index.html')
 
 
-# login user and retrieve qr
+# login user
 @app.route('/login', methods=['POST'])
 def login():
-    creds = str(request.form['username'] + '|' + request.form['password'])
-    if post(url=data['login-api'], headers={'Credentials': bs(creds.encode())},
-            allow_redirects=False).status_code == 200:
+    headers = {'Credentials': bs(str(request.form['username'] + '|' + request.form['password']).encode())}
+
+    if post(url=data['login-api'], headers=headers, allow_redirects=False).status_code == 200:
+        # set session variables
         session['username'] = request.form['username']
-        session['credentials'] = {'Credentials': bs(creds.encode())}
+        session['headers'] = headers
+
+        # log info onto terminal and telegram channel
         print('Logged in ', session['username'])
         log(f"<code>{session['username']}</code> logged in")
         return redirect(url_for('form'))
+
     else:
         return render_template('begone.html')
 
 
 # display message details form
-@authorized
+@login_required
 @app.route('/form')
 def form():
-    return render_template('form.html', events=json.loads(
-        get(
-            url=data['events-api'], headers=session['credentials']
-        ).text))
+    return render_template(
+        'form.html',
+        events=json.loads(get(url=data['events-api'], headers=session['headers']).text)
+    )
 
 
 # display loading page while sending messages
-@authorized
+@login_required
 @app.route('/submit', methods=['POST'])
 def submit_form():
-    if 'whatsapp' not in request.form and 'sendgrid' not in request.form:
+    if 'whatsapp' not in request.form and 'sendgrid' not in request.form:  # neither option was selected
         return render_template('begone.html')
 
-    if 'sendgrid' in request.form:
+    if 'sendgrid' in request.form:  # emails are to be sent
+        # set kwargs in a seperate dict, since threaded function cannot access session or request objects
         params = dict(request.form)
-        params['credentials'] = session['credentials']
+        params['headers'] = session['headers']
         params['username'] = session['username']
-        Thread(target=send_mail, kwargs=params).start()
+        Thread(target=send_mail, kwargs=params).start()  # start procedure in a parallel thread
 
-    if 'whatsapp' in request.form:
-        # set message in correct format to send
+    if 'whatsapp' in request.form:  # whatsapp messages are to be sent
+        # set info as session variables since they need to be accessed later, and are different for each session
         session['msg'] = (
                 "Hey, {} :wave:\n" +
                 demojize(request.form['content']) + "\n" +
                 "- SCRIPT bot :robot_face:\n"
-        )
+        )  # set message in correct format to send
         session['table'] = request.form['table']
         session['ids'] = request.form['ids']
-        return render_template('loading.html', target='/qr')
+        return render_template('loading.html', target='/qr')  # show loading page while selenium opens whatsapp web
 
+    # if whatsapp messages are not to be sent, go back to form with a success message
     return render_template(
         'form.html', msg="Sending Messages!",
-        events=json.loads(get(url=data['events-api'], headers=session['credentials']).text)
+        events=json.loads(get(url=data['events-api'], headers=session['headers']).text)
     )
 
 
 # send emails
 def send_mail(**kwargs):
-    res = post(url=data['email-api'], data=kwargs, headers=kwargs['credentials'])
-    print(res, res.text)
+    post(url=data['email-api'], data=kwargs, headers=kwargs['headers'])  # post call to hades
 
     # Get data from our API
     if kwargs['ids'] == 'all':
-        names = meow.getData(data['table-api'], kwargs['table'], kwargs['credentials'], 'all')[0]
+        names = meow.getData(data['table-api'], kwargs['table'], kwargs['headers'], 'all')[0]
     else:
         names = meow.getData(
             data['table-api'],
-            kwargs['table'], kwargs['credentials'],
+            kwargs['table'], kwargs['headers'],
             list(map(lambda x: int(x), kwargs['ids'].split(' ')))
         )[0]
 
+    # write names of recipients to a file
     newline = '\n'
     with open('sendgrid_list.txt', 'w') as file:
         file.write(f"E-Mails sent to :\n{newline.join(names)}")
 
+    # log file to telegram channel
     tg.send_chat_action(data['log_channel'], 'upload document')
     log(f"List of people who received E-Mails during run by user <code>{kwargs['username']}</code>",
         "sendgrid_list.txt")
-    os.remove('sendgrid_list.txt')
+    os.remove('sendgrid_list.txt')  # no need for file anymore
 
     print(kwargs['username'], "Done sending e-mails")
 
 
 # display qr code to scan
-@authorized
+@login_required
 @app.route('/qr')
 def qr():
     print('started driver session for ' + session['username'])
@@ -143,8 +150,8 @@ def qr():
     return render_template('qr.html', qr=qr_img)
 
 
-# send messages on whatsapp
-@authorized
+# start sending messages on whatsapp
+@login_required
 @app.route('/send', methods=['POST', 'GET'])
 def send():
     # wait till the chat search box is loaded, so you know you're logged in
@@ -153,31 +160,34 @@ def send():
     print(session['username'], "logged into whatsapp")
 
     # send messages
-    Thread(target=run_whatsapp, kwargs=dict(session)).start()
+    Thread(target=send_messages, kwargs=dict(session)).start()
 
     return render_template(
         'form.html', msg="Sending Messages!",
-        events=json.loads(get(url=data['events-api'], headers=session['credentials']).text)
+        events=json.loads(get(url=data['events-api'], headers=session['headers']).text)
     )
 
 
-def run_whatsapp(**kwargs):
+# send messages on whatsapp
+def send_messages(**kwargs):
+    # list to store successes and failures
     messages_sent_to = []
     messages_not_sent_to = []
 
     try:
         # Get data from our API
         if kwargs['ids'] == 'all':
-            names, numbers = meow.getData(data['table-api'], kwargs['table'], kwargs['credentials'], 'all')
+            names, numbers = meow.getData(data['table-api'], kwargs['table'], kwargs['headers'], 'all')
         else:
-            names, numbers = meow.getData(data['table-api'], kwargs['table'], kwargs['credentials'],
+            names, numbers = meow.getData(data['table-api'], kwargs['table'], kwargs['headers'],
                                           list(map(lambda x: int(x), kwargs['ids'].split(' '))))
 
-        # Send messages to all entries in file
+        # Send messages to all registrants
         for num, name in zip(numbers, names):
             try:
                 messages_sent_to.append(
-                    meow.sendMessage(num, name, kwargs['msg'], browser[kwargs['username']], time=30))
+                    meow.sendMessage(num, name, kwargs['msg'], browser[kwargs['username']], time=30)
+                )
             except TimeoutException:
                 print("chat could not be loaded for", name)
                 messages_not_sent_to.append(name)
@@ -191,16 +201,18 @@ def run_whatsapp(**kwargs):
         traceback.print_exc()
 
     finally:
+        # write all successes and failures to a file
         newline = '\n'
         with open('whatsapp_list.txt', 'w') as file:
             file.write(
                 f"Messages sent to :\n{newline.join(messages_sent_to)}\n\n"
                 f"Messages not sent to :\n{newline.join(messages_not_sent_to)}")
 
+        # log file to telegram channel
         tg.send_chat_action(data['log_channel'], 'upload document')
         log(f"List of people who received and didn't receive WhatsApp messages during run by user "
             f"<code>{kwargs['username']}</code>",
             "whatsapp_list.txt")
-        os.remove('whatsapp_list.txt')
+        os.remove('whatsapp_list.txt')  # no need for file anymore
 
         print(kwargs['username'], "done sending messages!")

@@ -3,7 +3,6 @@ import json
 import requests
 from emoji import emojize
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
@@ -11,31 +10,25 @@ from time import sleep
 
 whatsapp_api = 'https://api.whatsapp.com/send?phone=91'  # Format of url to open chat with someone
 
+# dict with list of functions for each browser
 driver = {
     'firefox': [webdriver.Firefox, webdriver.FirefoxOptions],
     'chrome': [webdriver.Chrome, webdriver.ChromeOptions]
 }
 
 
-def waitTillElementLoaded(browser, element, time=10000):
-    element_present = ec.presence_of_element_located((By.XPATH, element))
+# to make browser wait till a certain element is loaded onto the screen
+def waitTillElementLoaded(browser, element, time=10000, identifier=By.XPATH):
+    element_present = ec.presence_of_element_located((identifier, element))
     WebDriverWait(browser, time).until(element_present)
 
 
-def waitTillLinkLoaded(browser, element):
-    try:
-        element_present = ec.presence_of_element_located((By.LINK_TEXT, element))
-        WebDriverWait(browser, 10000).until(element_present)
-    except TimeoutException:
-        print('Timed out waiting for page to load')
-
-
-def getData(url, table, credentials, ids):
+def getData(url, table, headers, ids):
     names_list = []  # List of all names
     numbers_list = []  # List of all numbers
 
     # Get data from our API
-    api_data = json.loads(requests.get(url=url, params={'table': table}, headers=credentials).text)
+    api_data = json.loads(requests.get(url=url, params={'table': table}, headers=headers).text)
 
     if ids == 'all':
         ids = list(map(lambda x: x['id'], api_data))
@@ -53,9 +46,8 @@ def getData(url, table, credentials, ids):
 def startWebSession(browser_type, driver_path):
     # set browser options
     options = driver[browser_type][1]()
-    options.add_argument(
-        "user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 "
-        "Safari/537.36")
+    options.add_argument("user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                         "Chrome/77.0.3865.120 Safari/537.36")
     options.headless = True
     browser = driver[browser_type][0](executable_path=driver_path, options=options)  # create driver object
 
@@ -65,8 +57,9 @@ def startWebSession(browser_type, driver_path):
     # Get the qr image
     waitTillElementLoaded(browser,
                           '/html/body/div[1]/div/div/div[2]/div[1]/div/div[2]/div/img')  # wait till qr is loaded
-    qr = browser.find_element_by_xpath(
-        '/html/body/div[1]/div/div/div[2]/div[1]/div/div[2]/div/img').get_attribute('src')  # retreive qr image
+    # retreive qr image
+    qr = (browser.find_element_by_xpath('/html/body/div[1]/div/div/div[2]/div[1]/div/div[2]/div/img')
+          .get_attribute('src'))
     print('qr saved')
 
     return browser, qr  # returning the driver object and qr (b64 encoded)
@@ -82,7 +75,7 @@ def sendMessage(num, name, msg, browser, time=10000):
     waitTillElementLoaded(browser, '//*[@id="action-button"]')  # Wait till send message button is loaded
     browser.find_element_by_xpath('//*[@id="action-button"]').click()  # Click on "send message" button
 
-    waitTillLinkLoaded(browser, "use WhatsApp Web")  # wait till the link is loaded
+    waitTillElementLoaded(browser, "use WhatsApp Web", identifier=By.LINK_TEXT)  # wait till the link is loaded
     browser.find_element_by_link_text("use WhatsApp Web").click()  # click on link to open chat
     print('opened chat')
 
