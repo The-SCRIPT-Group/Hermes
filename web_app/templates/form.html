@@ -5,6 +5,7 @@
 {% block page_content %}
     <div class="center" style="max-width: 800px">
         <form class="form" method="post" action="/submit">
+
             <label for="table" class="sr-only"></label>
             <p>
                 <select class="form-control center text-center" name="table" id="table" style="max-width: 539px">
@@ -13,21 +14,24 @@
                     {% endfor %}
                 </select>
             </p>
+
             <label for="ids" class="sr-only"></label>
             <input type="text" class="form-control center" name="ids" id="ids"
                    placeholder="Enter all the user ids seperated by space; just enter 'all' to send to all"
                    style="width: 70%"
                    required>
+
             <label for="subject" class="sr-only"></label>
             <input type="text" class="form-control center" name="subject" id="subject"
                    placeholder="Subject (for E-Mails only)"
-                   style="width: 70%"
-                   required>
+                   style="width: 70%">
+
             <label for="content" class="sr-only"></label>
             <textarea class="form-control center" name="content" id="content"
                       placeholder="Type your message here! You can use emojis in your message as well :)"
                       style="width: 70%"
                       required></textarea>
+
             <div class="h4 center" style="margin-bottom: 10px; width: 330px">
                 <span class="float-left">
                     <input type="checkbox" id="whatsapp" name="whatsapp" checked>
@@ -38,6 +42,7 @@
                     <label for="sendgrid">E-Mail&nbsp;</label>
                 </span>
             </div>
+
             <input class="btn btn-lg btn-primary btn-block center" type="submit" value="SEND" style="width: 330px">
         </form>
     </div>
