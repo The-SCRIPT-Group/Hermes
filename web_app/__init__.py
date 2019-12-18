@@ -180,7 +180,7 @@ def send_messages(**kwargs):
             names, numbers = meow.getData(data['table-api'], kwargs['table'], kwargs['headers'], 'all')
         else:
             names, numbers = meow.getData(data['table-api'], kwargs['table'], kwargs['headers'],
-                                          list(map(lambda x: int(x), kwargs['ids'].split(' '))))
+                                          list(map(lambda x: int(x), kwargs['ids'].strip().split(' '))))
 
         # Send messages to all registrants
         for num, name in zip(numbers, names):
