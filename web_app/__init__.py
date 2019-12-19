@@ -4,7 +4,6 @@ import traceback
 from base64 import b64encode as bs
 from threading import Thread
 
-from emoji import demojize
 from flask import Flask, render_template, session, request, url_for, redirect
 from requests import get, post
 from selenium.common.exceptions import TimeoutException
@@ -97,11 +96,8 @@ def submit_form():
 
     if 'whatsapp' in request.form:  # whatsapp messages are to be sent
         # set info as session variables since they need to be accessed later, and are different for each session
-        session['msg'] = (
-                "Hey, {} :wave:\n" +
-                demojize(request.form['content']) + "\n" +
-                "- SCRIPT bot :robot_face:\n"
-        )  # set message in correct format to send
+        session['msg'] = list(map(lambda x: x.replace("\\n", "\n"),
+                                  request.form['content'].split('\n')))  # split the message by new lines
         session['table'] = request.form['table']
         session['ids'] = request.form['ids']
         return render_template('loading.html', target='/qr')  # show loading page while selenium opens whatsapp web

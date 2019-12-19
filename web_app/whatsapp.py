@@ -4,6 +4,7 @@ import requests
 from emoji import emojize
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 from time import sleep
@@ -18,7 +19,7 @@ driver = {
 
 
 # to make browser wait till a certain element is loaded onto the screen
-def waitTillElementLoaded(browser, element, time=10000, identifier=By.XPATH):
+def waitTillElementLoaded(browser, element, time=60, identifier=By.XPATH):
     element_present = ec.presence_of_element_located((identifier, element))
     WebDriverWait(browser, time).until(element_present)
 
@@ -80,11 +81,21 @@ def sendMessage(num, name, msg, browser, time=10000):
     print('opened chat')
 
     # Wait till the text box is loaded onto the screen, then type out and send the full message
-    waitTillElementLoaded(browser, '/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]', time=time)
+    xpath = "/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]"  # xpath to text box
+    waitTillElementLoaded(browser, xpath, time=time)
 
-    browser.find_element_by_xpath(
-        '/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]'
-    ).send_keys(emojize(msg.format(name), use_aliases=True))
+    browser.find_element_by_xpath(xpath).send_keys(
+        emojize(f"Hey, {name} :wave:\n", use_aliases=True))  # welcome note
+
+    browser.find_element_by_xpath(xpath).send_keys(msg[0])  # send part before any newlines
+
+    # for all subsequent parts, first press shift+enter to add a new line, then type out that part
+    for m in msg[1:]:
+        browser.find_element_by_xpath(xpath).send_keys(Keys.SHIFT + Keys.ENTER, Keys.SHIFT, m)
+
+    browser.find_element_by_xpath(xpath).send_keys(
+        emojize("\n- SCRIPT bot :robot_face:\n", use_aliases=True))  # end note
+
     print('sent')
 
     sleep(3)  # Just so that we can supervise, otherwise it's too fast
