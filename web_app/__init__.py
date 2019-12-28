@@ -76,7 +76,7 @@ def login():
 def form():
     return render_template(
         'form.html',
-        events=json.loads(get(url=data['events-api'], headers=session['headers']).text)
+        events=get(url=data['events-api'], headers=session['headers']).json()
     )
 
 
@@ -105,7 +105,7 @@ def submit_form():
     # if whatsapp messages are not to be sent, go back to form with a success message
     return render_template(
         'form.html', msg="Sending Messages!",
-        events=json.loads(get(url=data['events-api'], headers=session['headers']).text)
+        events=get(url=data['events-api'], headers=session['headers']).json()
     )
 
 
@@ -160,7 +160,7 @@ def send():
 
     return render_template(
         'form.html', msg="Sending Messages!",
-        events=json.loads(get(url=data['events-api'], headers=session['headers']).text)
+        events=get(url=data['events-api'], headers=session['headers']).json()
     )
 
 

@@ -1,5 +1,3 @@
-import json
-
 import requests
 from emoji import emojize
 from selenium import webdriver
@@ -29,7 +27,7 @@ def getData(url, table, headers, ids):
     numbers_list = []  # List of all numbers
 
     # Get data from our API
-    api_data = json.loads(requests.get(url=url, params={'table': table}, headers=headers).text)
+    api_data = requests.get(url=url, params={'table': table}, headers=headers).json()
 
     if ids == 'all':
         ids = list(map(lambda x: x['id'], api_data))
