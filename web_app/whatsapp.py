@@ -28,9 +28,6 @@ def getData(url, table, headers, ids):
 
     # Get data from our API
     api_data = requests.get(url=url, params={'table': table}, headers=headers).json()
-    for i in range(len(api_data)):
-        if api_data[i]['name'] == "Aayush":
-            api_data = api_data[i:]
     if ids != 'all':
         api_data = [user for user in api_data if user['id'] in ids]
 
