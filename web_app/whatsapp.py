@@ -45,7 +45,7 @@ def startWebSession(browser_type, driver_path):
     options = driver[browser_type][1]()
     options.add_argument("user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
                          "Chrome/77.0.3865.120 Safari/537.36")
-    # options.headless = True
+    options.headless = True
     browser = driver[browser_type][0](executable_path=driver_path, options=options)  # create driver object
 
     browser.get('https://web.whatsapp.com/')  # opening whatsapp in browser
