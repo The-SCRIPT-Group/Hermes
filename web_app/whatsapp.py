@@ -28,15 +28,13 @@ def getData(url, table, headers, ids):
 
     # Get data from our API
     api_data = requests.get(url=url, params={'table': table}, headers=headers).json()
-
-    if ids == 'all':
-        ids = list(map(lambda x: x['id'], api_data))
+    if ids != 'all':
+        api_data = [user for user in api_data if user['id'] in ids]
 
     # Add names and numbers to respective lists
     for user in api_data:
-        if int(user['id']) in ids:
-            names_list.append(user['name'])
-            numbers_list.append(user['phone'].split('|')[-1])
+        names_list.append(user['name'])
+        numbers_list.append(user['phone'].split('|')[-1])
 
     return names_list, numbers_list
 
@@ -47,7 +45,7 @@ def startWebSession(browser_type, driver_path):
     options = driver[browser_type][1]()
     options.add_argument("user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
                          "Chrome/77.0.3865.120 Safari/537.36")
-    options.headless = True
+    # options.headless = True
     browser = driver[browser_type][0](executable_path=driver_path, options=options)  # create driver object
 
     browser.get('https://web.whatsapp.com/')  # opening whatsapp in browser

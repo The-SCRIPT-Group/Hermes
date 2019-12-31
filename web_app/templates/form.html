@@ -9,6 +9,7 @@
             <label for="table" class="sr-only"></label>
             <p>
                 <select class="form-control center text-center" name="table" id="table" style="max-width: 539px">
+                    <option value="all">All events</option>
                     {% for event in events.keys() %}
                         <option value="{{ event }}">{{ events[event] }}</option>
                     {% endfor %}
