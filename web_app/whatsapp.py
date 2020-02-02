@@ -1,3 +1,5 @@
+from time import sleep
+
 import requests
 from emoji import emojize
 from selenium import webdriver
@@ -5,11 +7,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
-from time import sleep
 
-whatsapp_api = 'https://api.whatsapp.com/send?phone=91'  # Format of url to open chat with someone
+# url to open chat with someone in whatsapp web
+# append phone number of participant to the end of this string
+whatsapp_api = 'https://api.whatsapp.com/send?phone=91'
 
 # dict with list of functions for each browser
+# first function for creating web driver
+# second function for adding options to the created browser
 driver = {
     'firefox': [webdriver.Firefox, webdriver.FirefoxOptions],
     'chrome': [webdriver.Chrome, webdriver.ChromeOptions]
@@ -22,13 +27,21 @@ def waitTillElementLoaded(browser, element, time=60, identifier=By.XPATH):
     WebDriverWait(browser, time).until(element_present)
 
 
+# get all data of all participants from GET call to passed url
 def getData(url, table, headers, ids):
+    # url - GET call to this url will return data of all participants from a certain event table
+    # table - the event table from which participant data is to be returned
+    # headers - contain the credentials of currently logged in user as a base64 encoded string
+    #           in the format `username|password`, which is stored in header as the value to the key `Credentials`
+    # ids - list of ids to be contacted
+
     names_list = []  # List of all names
     numbers_list = []  # List of all numbers
 
-    # Get data from our API
+    # Get data of participants from a certain event table
     api_data = requests.get(url=url, params={'table': table}, headers=headers).json()
     if ids != 'all':
+        # select data of only those participants whose id is in the list of ids given as argument
         api_data = [user for user in api_data if user['id'] in ids]
 
     # Add names and numbers to respective lists
@@ -42,29 +55,37 @@ def getData(url, table, headers, ids):
 # Method to start a new session of WhatsApp Web for web app
 def startWebSession(browser_type, driver_path):
     # set browser options
-    options = driver[browser_type][1]()
+    options = driver[browser_type][1]()  # create Options object for respective browser
     options.add_argument("user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
-                         "Chrome/77.0.3865.120 Safari/537.36")
-    options.headless = True
-    browser = driver[browser_type][0](executable_path=driver_path, options=options)  # create driver object
+                         "Chrome/77.0.3865.120 Safari/537.36")  # set user-agent to fool whatsapp web
+    options.headless = True  # browser to be opened headless - server has no display
 
-    browser.get('https://web.whatsapp.com/')  # opening whatsapp in browser
+    # create driver object with above options
+    browser = driver[browser_type][0](executable_path=driver_path, options=options)
+
+    browser.get('https://web.whatsapp.com/')  # open whatsapp web in browser
     print('whatsapp opened')
 
-    # Get the qr image
+    # Get the qr code
     waitTillElementLoaded(browser,
                           '/html/body/div[1]/div/div/div[2]/div[1]/div/div[2]/div/img')  # wait till qr is loaded
-    # retreive qr image
+    # retrieve qr code (base64 encoded image)
     qr = (browser.find_element_by_xpath('/html/body/div[1]/div/div/div[2]/div[1]/div/div[2]/div/img')
           .get_attribute('src'))
     print('qr saved')
 
-    return browser, qr  # returning the driver object and qr (b64 encoded)
+    return browser, qr  # returning the driver object and qr
 
 
 # Method to send a message to someone
 def sendMessage(num, name, msg, browser, time=10000):
-    api = whatsapp_api + str(num)  # Specific url
+    # num - phone number to which message is to be sent
+    # name - name(s) of participant(s)
+    # msg - the message to be sent
+    # browser - webdriver object using which whatsapp web is to be operated
+    # time - number of seconds to wait for an element to load before raising Timeout exception
+
+    api = whatsapp_api + str(num)  # Specific url to open chat with given number
     print(api, name)
     browser.get(api)  # Open url in browser
     print("opened whatsapp")
@@ -77,8 +98,9 @@ def sendMessage(num, name, msg, browser, time=10000):
     print('opened chat')
 
     # Wait till the text box is loaded onto the screen, then type out and send the full message
+
     xpath = "/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]"  # xpath to text box
-    waitTillElementLoaded(browser, xpath, time=time)
+    waitTillElementLoaded(browser, xpath, time=time)  # wait till text box is loaded
 
     browser.find_element_by_xpath(xpath).send_keys(
         emojize(f"Hey, {name} :wave:\n", use_aliases=True))  # welcome note
