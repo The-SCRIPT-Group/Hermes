@@ -17,7 +17,7 @@ A basic setup script is included in the repo, that allows the application to fun
 ## To send messages
 - Login with your `tsg id`
 - Select event from list of events
-- Enter ids to send message to, seperated by a space / enter `all` to send to all registrants
+- Enter ids to send message to, separated by a space / enter `all` to send to all registrants
 - Enter subject _if sending mail_
 - Enter message
     - For E-Mails, the message is to be written as HTML content
