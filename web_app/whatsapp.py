@@ -122,4 +122,13 @@ def send_message(num, name, msg, browser, time=10000):
 
     sleep(3)  # Just so that we can supervise, otherwise it's too fast
 
+    # delete the chat
+    browser.find_element_by_xpath(
+        "/html/body/div[1]/div/div/div[4]/div/header/div[3]/div/div[3]").click()  # click on menu
+    browser.find_element_by_xpath(
+        "/html/body/div[1]/div/div/div[4]/div/header/div[3]/div/div[3]/span/div/ul/li[5]/div"
+    ).click()  # click on delete option
+    browser.find_element_by_xpath(
+        "/html/body/div[1]/div/span[2]/div/div/div/div/div/div/div[2]/div[2]").click()  # click on confirmation button
+
     return name + ' : ' + api
