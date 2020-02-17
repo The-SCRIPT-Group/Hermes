@@ -2,8 +2,7 @@
 .idea
 *.log
 *.json
-*.exe
+geckodriver*
 venv
-venv_linux
 *.sh
 __pycache__
