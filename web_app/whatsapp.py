@@ -2,6 +2,7 @@ from time import sleep
 
 import requests
 from emoji import emojize
+from pandas import read_csv
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -28,26 +29,31 @@ def wait_till_element_loaded(browser, element, time=60, identifier=By.XPATH):
 
 
 # get all data of all participants from GET call to passed url
-def get_data(url, table, headers, ids):
+def getData(url, table, headers, ids, path=""):
     # url - GET call to this url will return data of all participants from a certain event table
     # table - the event table from which participant data is to be returned
     # headers - contain the credentials of currently logged in user as a base64 encoded string
     #           in the format `username|password`, which is stored in header as the value to the key `Credentials`
     # ids - list of ids to be contacted
+    # path - local path to the csv containing participants' details
 
     names_list = []  # List of all names
     numbers_list = []  # List of all numbers
 
     # Get data of participants from a certain event table
-    api_data = requests.get(url=url, params={'table': table}, headers=headers).json()
+    if path != "":  # if source is a local csv
+        api_data = read_csv(path).to_dict(orient='records')
+    else:  # if source is hades
+        api_data = requests.get(url=url, params={'table': table}, headers=headers).json()
+
+    # select data of only those participants whose id is in the list of ids given as argument
     if ids != 'all':
-        # select data of only those participants whose id is in the list of ids given as argument
         api_data = [user for user in api_data if user['id'] in ids]
 
     # Add names and numbers to respective lists
     for user in api_data:
         names_list.append(user['name'])
-        numbers_list.append(user['phone'].split('|')[-1])
+        numbers_list.append(str(user['phone']).split('|')[-1])
 
     return names_list, numbers_list
 
