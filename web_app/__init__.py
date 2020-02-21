@@ -243,7 +243,7 @@ def send_messages(**kwargs):
                 )
             except TimeoutException:  # if chat with participant couldn't be loaded in 30 seconds
                 print("chat could not be loaded for", name)
-                messages_not_sent_to.append(name)  # append name to list of failures
+                messages_not_sent_to.append(name + " : " + num)  # append name to list of failures
 
         # Close browser
         browser[kwargs['username']].close()

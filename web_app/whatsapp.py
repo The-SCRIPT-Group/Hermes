@@ -112,7 +112,8 @@ def send_message(num, name, msg, browser, time=10000):
     xpath = "/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]"  # xpath to text box
     wait_till_element_loaded(browser, xpath, time=time)  # wait till text box is loaded
 
-    browser.find_element_by_xpath(xpath).send_keys(emojize(f"Hey, {name} :wave:\n", use_aliases=True))  # welcome note
+    browser.find_element_by_xpath(xpath).send_keys(
+        emojize(f"Hey {name} :wave:\n", use_aliases=True))  # welcome note
 
     browser.find_element_by_xpath(xpath).send_keys(msg[0])  # send part before any newlines
 
