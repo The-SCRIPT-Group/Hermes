@@ -1,6 +1,6 @@
-urllib3
-waitress
+emoji
 flask
+gunicorn
 requests
 selenium
-emoji
+urllib3

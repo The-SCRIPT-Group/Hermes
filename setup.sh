@@ -28,8 +28,13 @@ server {
     include /etc/letsencrypt/options-ssl-nginx.conf;
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
 
+    location /static {
+        root /home/hermes/Hermes/web_app;
+        try_files \$uri \$uri/ =404;
+    }
+
     location ^~ / {
-        proxy_pass        http://127.0.0.1:8080;
+        proxy_pass        http://127.0.0.1:8000;
     }
 }
 EOF
