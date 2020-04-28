@@ -4,7 +4,7 @@
 
 export DEBIAN_FRONTEND="noninteractive"
 sudo apt update -y
-sudo apt install python3.8* git nginx python3-certbot-nginx python3-pip firefox -y
+sudo apt install python3 git nginx python3-certbot-nginx python3-pip firefox -y
 cd /tmp || exit
 wget -qO- https://github.com/mozilla/geckodriver/releases/download/v0.26.0/geckodriver-v0.26.0-linux64.tar.gz | sudo tar xvz -C /usr/local/bin/
 sudo certbot --noninteractive --nginx --agree-tos --email akhilnarang@thescriptgroup.in --domain hermes.thescriptgroup.in
