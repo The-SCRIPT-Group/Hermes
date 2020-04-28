@@ -4,5 +4,4 @@
 *.json
 geckodriver*
 venv
-*.sh
 __pycache__
