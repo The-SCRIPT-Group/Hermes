@@ -71,7 +71,7 @@ def startWebSession(browser_type, driver_path):
                           '/html/body/div[1]/div/div/div[2]/div[1]/div/div[2]/div/canvas')  # wait till qr is loaded
     # retrieve qr code (base64 encoded image) from canvas
     qr = browser.execute_script(
-        'return document.querySelector("._2RT36 > canvas:nth-child(3)").toDataURL("image/png");')
+        'return document.querySelector("#app > div > div > div.landing-window > div.landing-main > div > div.zCzor > div > canvas").toDataURL("image/png");')
     print('qr saved')
 
     return browser, qr  # returning the driver object and qr
