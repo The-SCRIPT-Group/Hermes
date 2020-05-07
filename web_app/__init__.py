@@ -27,21 +27,22 @@ else:
     print("You don't have configuration JSON, go away")
     exit(1)
 
-tg = TG(data['telebot_api_key'])  # object used to log data to telegram
+tg = TG(data['telebot_api_key'])  # Object used to log data to telegram
 
 
-# log messages to tg channel
+# Log messages to tg channel
 def log(message, doc=None):
-    if doc is not None:  # if a document has been passed to log function, send it with send_document function
-        tg.send_document(data['log_channel'], f"<b>Hermes</b> :\n{message}", doc)
+    # If a document has been passed to log function, send it with send_document function
+    if doc is None:
+        tg.send_message(data['log_channel'], f"<b>Hermes</b>:\n{message}")
     else:
-        tg.send_message(data['log_channel'], f"<b>Hermes</b> :\n{message}")
+        tg.send_document(data['log_channel'], f"<b>Hermes</b>:\n{message}", doc)
 
 
-# wrapper; only execute function if user is logged in
+# Wrapper - only execute function if user is logged in
 def login_required(func):
     def inner(*args, **kwargs):
-        if 'username' in session:  # since on login the username is set as a session variable
+        if 'username' in session:  # Since on login the username is set as a session variable
             return func(*args, **kwargs)
         else:
             return render_template('begone.html')  # error page
@@ -49,7 +50,7 @@ def login_required(func):
     return inner
 
 
-# homepage - shows login details
+# Homepage - shows login details
 @app.route('/')
 def home():
     return render_template('index.html')
