@@ -4,6 +4,7 @@ import traceback
 from base64 import b64encode as bs
 from threading import Thread
 
+import yaml
 from flask import Flask, render_template, session, request, url_for, redirect
 from requests import get, post
 from selenium.common.exceptions import TimeoutException
@@ -16,15 +17,18 @@ app = Flask(__name__)
 app.secret_key = 'messenger_of_the_gods'
 
 # dictionary to store all the webdriver objects created in each session
-
 browser = {}
 
 # Get config data from json
-if os.path.exists(os.path.join(os.getcwd().replace('web_app', ''), 'data.json')):
-    with open(os.path.join(os.getcwd().replace('web_app', ''), 'data.json'), 'r') as f:
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+if os.path.exists(os.path.join(BASE_DIR, 'data.json')):
+    with open(os.path.join(BASE_DIR, 'data.json'), 'r') as f:
         data = json.load(f)
+elif os.path.exists(os.path.join(BASE_DIR, 'config.yml')):
+    with open(os.path.join(BASE_DIR, 'config.yml'), 'r') as f:
+        data = yaml.safe_load(f)
 else:
-    print("You don't have configuration JSON, go away")
+    print("You don't have configuration JSON or YAML, go away")
     exit(1)
 
 tg = TG(data['telebot_api_key'])  # Object used to log data to telegram

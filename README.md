@@ -2,7 +2,7 @@
 
 Web application for The SCRIPT Group to use for sending WhatsApp messages and E-Mails to a set of event registrants at once
 
-This requires 5 configuration variables set in a JSON file (`data.json`) in the home directory :<br/>
+This requires 5 configuration variables set in a JSON file (`data.json`) or a YAML file (`config.yml`) in the home directory :<br/>
 `browser` - Browser you want selenium to use. Currently configured only for Google Chrome (chrome) and Mozilla Firefox (firefox)<br/>
 `driver-path` - Path to your chromedriver/geckodriver executable<br/>
 `login-api` - API URL to verify user login credentials<br/>

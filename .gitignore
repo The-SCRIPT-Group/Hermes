@@ -2,6 +2,7 @@
 .idea
 *.log
 *.json
+*.yml
 geckodriver*
 venv
 __pycache__
