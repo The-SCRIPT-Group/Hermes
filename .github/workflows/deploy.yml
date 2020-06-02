@@ -8,4 +8,4 @@ jobs:
         SERVER_IP: ${{ secrets.SERVER_IP }}
     steps:
     - uses: actions/checkout@master
-    - run: bash deploy.sh
+    - run: bash shell_scripts/deploy.sh
