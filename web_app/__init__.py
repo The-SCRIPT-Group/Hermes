@@ -90,9 +90,7 @@ def login():
 def form(msg=None):
     # get all events accessible by the user, order in ascending value of event name
     events = OrderedDict(
-        sorted(
-            get(url=data['events-api'], headers=session['headers']).json().get('response').items(), key=lambda x: x[1]
-        )
+        sorted(get(url=data['events-api'], headers=session['headers']).json().items(), key=lambda x: x[1])
     )
 
     # events is the list of all the events that the currently logged in user can access
@@ -133,21 +131,21 @@ def send_mail(**kwargs):
     # Subject and content of mail retrieved from HTML form and passed to this function as items in kwargs
     response = post(url=data['email-api'], data=kwargs, headers=kwargs['headers'])
 
-    if response.status_code == 200:
-        # Get data from our API
-        # get_data() returns two lists - first containing names and second containing numbers
-        if kwargs['ids'] == 'all':  # retrieve names and numbers of all participants
-            names = meow.get_data(data['table-api'], kwargs['table'], kwargs['headers'], 'all')[0]
-        else:  # retrieve names and numbers of participants whose id was listed by user
-            # since ids are retrieved from form as a space separated string
-            # split the string by space and convert all resultant list items to int
-            names = meow.get_data(
-                data['table-api'],
-                kwargs['table'],
-                kwargs['headers'],
-                list(map(lambda x: int(x), kwargs['ids'].split(' '))),
-            )[0]
+    # Get data from our API
+    # get_data() returns two lists - first containing names and second containing numbers
+    if kwargs['ids'] == 'all':  # retrieve names and numbers of all participants
+        names = meow.get_data(data['table-api'], kwargs['table'], kwargs['headers'], 'all')[0]
+    else:  # retrieve names and numbers of participants whose id was listed by user
+        # since ids are retrieved from form as a space separated string
+        # split the string by space and convert all resultant list items to int
+        names = meow.get_data(
+            data['table-api'],
+            kwargs['table'],
+            kwargs['headers'],
+            list(map(lambda x: int(x), kwargs['ids'].split(' '))),
+        )[0]
 
+    if response.status_code == 200:
         # write names of recipients to a file
         newline = '\n'
         with open('sendgrid_list.txt', 'w') as file:
@@ -162,6 +160,22 @@ def send_mail(**kwargs):
         os.remove('sendgrid_list.txt')  # no need for file once it is sent, delete from server
 
         print(kwargs['username'], "Done sending e-mails")
+
+    else:
+        # write names of recipients to a file
+        newline = '\n'
+        with open('sendgrid_list.txt', 'w') as file:
+            file.write(f"E-Mails could not sent to :\n{newline.join(names)}")
+
+        # log list of recipients to telegram channel
+        tg.send_chat_action(data['log_channel'], 'upload document')
+        log(
+            f"List of people who could not received E-Mails during run by user <code>{kwargs['username']}</code>",
+            "sendgrid_list.txt",
+        )
+        os.remove('sendgrid_list.txt')  # no need for file once it is sent, delete from server
+
+        print(kwargs['username'], "failed in sending e-mails")
 
 
 # display qr code to scan
@@ -187,9 +201,7 @@ def qr():
 @app.route('/send', methods=['POST', 'GET'])
 def send():
     # wait till the chat search box is loaded, so you know you're logged into whatsapp web
-    meow.wait_till_element_loaded(
-        browser[session['username']], '/html/body/div[1]/div/div/div[3]/div/div[1]/div/label/input'
-    )
+    meow.wait_till_element_loaded(browser[session['username']], '/html/body/div[1]/div/div/div[3]/div/div[1]/div')
     print(session['username'], "logged into whatsapp")
 
     # start thread that will send messages on whatsapp
@@ -233,13 +245,12 @@ def send_messages(**kwargs):
         browser[kwargs['username']].close()
         print('closed driver for ' + kwargs['username'])
 
-    except Exception as e:  # for general exceptions
-        print(e)
+    except:  # for general exceptions
         traceback.print_exc()
 
     finally:
         # write all successes and failures to a file
-        newline = '\n'
+        newline = "\n"
         with open('whatsapp_list.txt', 'w') as file:
             file.write(
                 f"Messages sent to :\n{newline.join(messages_sent_to)}\n\n"

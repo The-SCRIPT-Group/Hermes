@@ -39,12 +39,10 @@ def get_data(url, table, headers, ids):
     numbers_list = []  # List of all numbers
 
     # Get data of participants from a certain event table
-    api_data = requests.get(url=url, params={'table': table}, headers=headers).json().get('response')
+    api_data = requests.get(url=url, params={'table': table}, headers=headers).json()
     if ids != 'all':
         # select data of only those participants whose id is in the list of ids given as argument
         api_data = [user for user in api_data if user['id'] in ids]
-
-    print(api_data)
 
     # Add names and numbers to respective lists
     for user in api_data:
@@ -62,7 +60,7 @@ def start_web_session(browser_type, driver_path):
         "user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
         "Chrome/77.0.3865.120 Safari/537.36"
     )  # set user-agent to fool whatsapp web
-    options.headless = True  # browser to be opened headless - server has no display
+    # options.headless = True  # browser to be opened headless - server has no display
 
     # create driver object with above options
     browser = driver[browser_type][0](executable_path=driver_path, options=options)
@@ -71,9 +69,9 @@ def start_web_session(browser_type, driver_path):
     print('whatsapp opened')
 
     # Get the qr code
-    wait_till_element_loaded(
-        browser, '/html/body/div[1]/div/div/div[2]/div[1]/div/div[2]/div/canvas'
-    )  # wait till qr is loaded
+
+    # wait till qr is loaded
+    wait_till_element_loaded(browser, '/html/body/div[1]/div/div/div[2]/div[1]/div/div[2]/div/canvas')
     # retrieve qr code (base64 encoded image) from canvas
     qr = browser.execute_script(
         'return document.querySelector("#app > div > div > div.landing-window > div.landing-main > div > div.zCzor > div > canvas").toDataURL("image/png");'
@@ -96,7 +94,7 @@ def send_message(num, name, msg, browser, time=10000):
     browser.get(api)  # Open url in browser
     print("opened whatsapp")
 
-    wait_till_element_loaded(browser, '//*[@id="action-button"]')  # Wait till send message button is loaded
+    # wait_till_element_loaded(browser, '//*[@id="action-button"]')  # Wait till send message button is loaded
     browser.find_element_by_xpath('//*[@id="action-button"]').click()  # Click on "send message" button
 
     wait_till_element_loaded(browser, "use WhatsApp Web", identifier=By.LINK_TEXT)  # wait till the link is loaded
