@@ -37,7 +37,7 @@ class TG:
             "parse_mode": parse_mode,
         }
 
-        return self.send("send_message", data)  # call telegram API to log text message
+        return self.send("sendMessage", data)  # call telegram API to log text message
 
     # function to display a chat action to the telegram channel
     def send_chat_action(self, chat_id, action):
