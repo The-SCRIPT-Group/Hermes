@@ -2,6 +2,7 @@ import json
 import os
 import traceback
 from base64 import b64encode as bs
+from collections import OrderedDict
 from threading import Thread
 
 import yaml
@@ -86,12 +87,16 @@ def login():
 # display message details form
 @login_required
 @app.route('/form')
-def form():
-    # events is the list of all the events that the currently logged in user can access
-    return render_template(
-        'form.html',
-        events=get(url=data['events-api'], headers=session['headers']).json()
+def form(msg=None):
+    # get all events accessible by the user, order in ascending value of event name
+    events = OrderedDict(
+        sorted(
+            get(url=data['events-api'], headers=session['headers']).json().get('response').items(), key=lambda x: x[1]
+        )
     )
+
+    # events is the list of all the events that the currently logged in user can access
+    return render_template('form.html', events=events, msg=msg)
 
 
 # display loading page while sending messages
@@ -110,51 +115,53 @@ def submit_form():
 
     if 'whatsapp' in request.form:  # whatsapp messages are to be sent
         # set info as session variables since they need to be accessed later, and are different for each session
-        session['msg'] = list(map(lambda x: x.replace("\\n", "\n"),
-                                  request.form['content'].split('\n')))  # split the message by new lines
+        session['msg'] = list(
+            map(lambda x: x.replace("\\n", "\n"), request.form['content'].split('\n'))
+        )  # split the message by new lines
         session['table'] = request.form['table']  # the event table whose participants are to be contacted
         session['ids'] = request.form['ids']  # the ids (space separated) who are to be contacted
         return render_template('loading.html', target='/qr')  # show loading page while selenium opens whatsapp web
 
     # if whatsapp messages are not to be sent, go back to form with a success message
     # events is the list of all the events that the currently logged in user can access
-    return render_template(
-        'form.html', msg="Sending Messages!",
-        events=get(url=data['events-api'], headers=session['headers']).json()
-    )
+    return form(msg="Sending Messages")
 
 
 # send emails
 def send_mail(**kwargs):
     # POST call to `email-api` which makes Hades use sendgrid API to send emails to all participants whose id is listed
     # Subject and content of mail retrieved from HTML form and passed to this function as items in kwargs
-    post(url=data['email-api'], data=kwargs, headers=kwargs['headers'])
+    response = post(url=data['email-api'], data=kwargs, headers=kwargs['headers'])
 
-    # Get data from our API
-    # getData() returns two lists - first containing names and second containing numbers
-    if kwargs['ids'] == 'all':  # retrieve names and numbers of all participants
-        names = meow.getData(data['table-api'], kwargs['table'], kwargs['headers'], 'all')[0]
-    else:  # retrieve names and numbers of participants whose id was listed by user
-        # since ids are retrieved from form as a space separated string
-        # split the string by space and convert all resultant list items to int
-        names = meow.getData(
-            data['table-api'],
-            kwargs['table'], kwargs['headers'],
-            list(map(lambda x: int(x), kwargs['ids'].split(' ')))
-        )[0]
+    if response.status_code == 200:
+        # Get data from our API
+        # getData() returns two lists - first containing names and second containing numbers
+        if kwargs['ids'] == 'all':  # retrieve names and numbers of all participants
+            names = meow.getData(data['table-api'], kwargs['table'], kwargs['headers'], 'all')[0]
+        else:  # retrieve names and numbers of participants whose id was listed by user
+            # since ids are retrieved from form as a space separated string
+            # split the string by space and convert all resultant list items to int
+            names = meow.getData(
+                data['table-api'],
+                kwargs['table'],
+                kwargs['headers'],
+                list(map(lambda x: int(x), kwargs['ids'].split(' '))),
+            )[0]
 
-    # write names of recipients to a file
-    newline = '\n'
-    with open('sendgrid_list.txt', 'w') as file:
-        file.write(f"E-Mails sent to :\n{newline.join(names)}")
+        # write names of recipients to a file
+        newline = '\n'
+        with open('sendgrid_list.txt', 'w') as file:
+            file.write(f"E-Mails sent to :\n{newline.join(names)}")
 
-    # log list of recipients to telegram channel
-    tg.send_chat_action(data['log_channel'], 'upload document')
-    log(f"List of people who received E-Mails during run by user <code>{kwargs['username']}</code>",
-        "sendgrid_list.txt")
-    os.remove('sendgrid_list.txt')  # no need for file once it is sent, delete from server
+        # log list of recipients to telegram channel
+        tg.send_chat_action(data['log_channel'], 'upload document')
+        log(
+            f"List of people who received E-Mails during run by user <code>{kwargs['username']}</code>",
+            "sendgrid_list.txt",
+        )
+        os.remove('sendgrid_list.txt')  # no need for file once it is sent, delete from server
 
-    print(kwargs['username'], "Done sending e-mails")
+        print(kwargs['username'], "Done sending e-mails")
 
 
 # display qr code to scan
@@ -180,8 +187,9 @@ def qr():
 @app.route('/send', methods=['POST', 'GET'])
 def send():
     # wait till the chat search box is loaded, so you know you're logged into whatsapp web
-    meow.waitTillElementLoaded(browser[session['username']],
-                               '/html/body/div[1]/div/div/div[3]/div/div[1]/div/label/input')
+    meow.waitTillElementLoaded(
+        browser[session['username']], '/html/body/div[1]/div/div/div[3]/div/div[1]/div/label/input'
+    )
     print(session['username'], "logged into whatsapp")
 
     # start thread that will send messages on whatsapp
@@ -189,10 +197,7 @@ def send():
 
     # go back to form with a success message
     # events is the list of all the events that the currently logged in user can access
-    return render_template(
-        'form.html', msg="Sending Messages!",
-        events=get(url=data['events-api'], headers=session['headers']).json()
-    )
+    return form("Sending Messages!")
 
 
 # send messages on whatsapp
@@ -206,8 +211,12 @@ def send_messages(**kwargs):
         if kwargs['ids'] == 'all':
             names, numbers = meow.getData(data['table-api'], kwargs['table'], kwargs['headers'], 'all')
         else:
-            names, numbers = meow.getData(data['table-api'], kwargs['table'], kwargs['headers'],
-                                          list(map(lambda x: int(x), kwargs['ids'].strip().split(' '))))
+            names, numbers = meow.getData(
+                data['table-api'],
+                kwargs['table'],
+                kwargs['headers'],
+                list(map(lambda x: int(x), kwargs['ids'].strip().split(' '))),
+            )
 
         # Send messages to all registrants
         for num, name in zip(numbers, names):
@@ -234,13 +243,16 @@ def send_messages(**kwargs):
         with open('whatsapp_list.txt', 'w') as file:
             file.write(
                 f"Messages sent to :\n{newline.join(messages_sent_to)}\n\n"
-                f"Messages not sent to :\n{newline.join(messages_not_sent_to)}")
+                f"Messages not sent to :\n{newline.join(messages_not_sent_to)}"
+            )
 
         # log file of all successes and failures to telegram channel
         tg.send_chat_action(data['log_channel'], 'upload document')
-        log(f"List of people who received and didn't receive WhatsApp messages during run by user "
+        log(
+            f"List of people who received and didn't receive WhatsApp messages during run by user "
             f"<code>{kwargs['username']}</code>",
-            "whatsapp_list.txt")
+            "whatsapp_list.txt",
+        )
         os.remove('whatsapp_list.txt')  # no need for file once it is sent, delete from server
 
         print(kwargs['username'], "done sending messages!")

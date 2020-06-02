@@ -17,7 +17,7 @@ whatsapp_api = 'https://api.whatsapp.com/send?phone=91'
 # second function for adding options to the created browser
 driver = {
     'firefox': [webdriver.Firefox, webdriver.FirefoxOptions],
-    'chrome': [webdriver.Chrome, webdriver.ChromeOptions]
+    'chrome': [webdriver.Chrome, webdriver.ChromeOptions],
 }
 
 
@@ -39,10 +39,12 @@ def getData(url, table, headers, ids):
     numbers_list = []  # List of all numbers
 
     # Get data of participants from a certain event table
-    api_data = requests.get(url=url, params={'table': table}, headers=headers).json()
+    api_data = requests.get(url=url, params={'table': table}, headers=headers).json().get('response')
     if ids != 'all':
         # select data of only those participants whose id is in the list of ids given as argument
         api_data = [user for user in api_data if user['id'] in ids]
+
+    print(api_data)
 
     # Add names and numbers to respective lists
     for user in api_data:
@@ -56,8 +58,10 @@ def getData(url, table, headers, ids):
 def startWebSession(browser_type, driver_path):
     # set browser options
     options = driver[browser_type][1]()  # create Options object for respective browser
-    options.add_argument("user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
-                         "Chrome/77.0.3865.120 Safari/537.36")  # set user-agent to fool whatsapp web
+    options.add_argument(
+        "user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/77.0.3865.120 Safari/537.36"
+    )  # set user-agent to fool whatsapp web
     options.headless = True  # browser to be opened headless - server has no display
 
     # create driver object with above options
@@ -67,11 +71,13 @@ def startWebSession(browser_type, driver_path):
     print('whatsapp opened')
 
     # Get the qr code
-    waitTillElementLoaded(browser,
-                          '/html/body/div[1]/div/div/div[2]/div[1]/div/div[2]/div/canvas')  # wait till qr is loaded
+    waitTillElementLoaded(
+        browser, '/html/body/div[1]/div/div/div[2]/div[1]/div/div[2]/div/canvas'
+    )  # wait till qr is loaded
     # retrieve qr code (base64 encoded image) from canvas
     qr = browser.execute_script(
-        'return document.querySelector("#app > div > div > div.landing-window > div.landing-main > div > div.zCzor > div > canvas").toDataURL("image/png");')
+        'return document.querySelector("#app > div > div > div.landing-window > div.landing-main > div > div.zCzor > div > canvas").toDataURL("image/png");'
+    )
     print('qr saved')
 
     return browser, qr  # returning the driver object and qr
@@ -102,8 +108,7 @@ def sendMessage(num, name, msg, browser, time=10000):
     xpath = "/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]"  # xpath to text box
     waitTillElementLoaded(browser, xpath, time=time)  # wait till text box is loaded
 
-    browser.find_element_by_xpath(xpath).send_keys(
-        emojize(f"Hey, {name} :wave:\n", use_aliases=True))  # welcome note
+    browser.find_element_by_xpath(xpath).send_keys(emojize(f"Hey, {name} :wave:\n", use_aliases=True))  # welcome note
 
     browser.find_element_by_xpath(xpath).send_keys(msg[0])  # send part before any newlines
 
@@ -112,7 +117,8 @@ def sendMessage(num, name, msg, browser, time=10000):
         browser.find_element_by_xpath(xpath).send_keys(Keys.SHIFT + Keys.ENTER, Keys.SHIFT, m)
 
     browser.find_element_by_xpath(xpath).send_keys(
-        emojize("\n- SCRIPT bot :robot_face:\n", use_aliases=True))  # end note
+        emojize("\n- SCRIPT bot :robot_face:\n", use_aliases=True)
+    )  # end note
 
     print('sent')
 
