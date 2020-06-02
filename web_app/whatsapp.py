@@ -22,13 +22,13 @@ driver = {
 
 
 # to make browser wait till a certain element is loaded onto the screen
-def waitTillElementLoaded(browser, element, time=60, identifier=By.XPATH):
+def wait_till_element_loaded(browser, element, time=60, identifier=By.XPATH):
     element_present = ec.presence_of_element_located((identifier, element))
     WebDriverWait(browser, time).until(element_present)
 
 
 # get all data of all participants from GET call to passed url
-def getData(url, table, headers, ids):
+def get_data(url, table, headers, ids):
     # url - GET call to this url will return data of all participants from a certain event table
     # table - the event table from which participant data is to be returned
     # headers - contain the credentials of currently logged in user as a base64 encoded string
@@ -55,7 +55,7 @@ def getData(url, table, headers, ids):
 
 
 # Method to start a new session of WhatsApp Web for web app
-def startWebSession(browser_type, driver_path):
+def start_web_session(browser_type, driver_path):
     # set browser options
     options = driver[browser_type][1]()  # create Options object for respective browser
     options.add_argument(
@@ -71,7 +71,7 @@ def startWebSession(browser_type, driver_path):
     print('whatsapp opened')
 
     # Get the qr code
-    waitTillElementLoaded(
+    wait_till_element_loaded(
         browser, '/html/body/div[1]/div/div/div[2]/div[1]/div/div[2]/div/canvas'
     )  # wait till qr is loaded
     # retrieve qr code (base64 encoded image) from canvas
@@ -84,7 +84,7 @@ def startWebSession(browser_type, driver_path):
 
 
 # Method to send a message to someone
-def sendMessage(num, name, msg, browser, time=10000):
+def send_message(num, name, msg, browser, time=10000):
     # num - phone number to which message is to be sent
     # name - name(s) of participant(s)
     # msg - the message to be sent
@@ -96,17 +96,17 @@ def sendMessage(num, name, msg, browser, time=10000):
     browser.get(api)  # Open url in browser
     print("opened whatsapp")
 
-    waitTillElementLoaded(browser, '//*[@id="action-button"]')  # Wait till send message button is loaded
+    wait_till_element_loaded(browser, '//*[@id="action-button"]')  # Wait till send message button is loaded
     browser.find_element_by_xpath('//*[@id="action-button"]').click()  # Click on "send message" button
 
-    waitTillElementLoaded(browser, "use WhatsApp Web", identifier=By.LINK_TEXT)  # wait till the link is loaded
+    wait_till_element_loaded(browser, "use WhatsApp Web", identifier=By.LINK_TEXT)  # wait till the link is loaded
     browser.find_element_by_link_text("use WhatsApp Web").click()  # click on link to open chat
     print('opened chat')
 
     # Wait till the text box is loaded onto the screen, then type out and send the full message
 
     xpath = "/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]"  # xpath to text box
-    waitTillElementLoaded(browser, xpath, time=time)  # wait till text box is loaded
+    wait_till_element_loaded(browser, xpath, time=time)  # wait till text box is loaded
 
     browser.find_element_by_xpath(xpath).send_keys(emojize(f"Hey, {name} :wave:\n", use_aliases=True))  # welcome note
 

@@ -135,13 +135,13 @@ def send_mail(**kwargs):
 
     if response.status_code == 200:
         # Get data from our API
-        # getData() returns two lists - first containing names and second containing numbers
+        # get_data() returns two lists - first containing names and second containing numbers
         if kwargs['ids'] == 'all':  # retrieve names and numbers of all participants
-            names = meow.getData(data['table-api'], kwargs['table'], kwargs['headers'], 'all')[0]
+            names = meow.get_data(data['table-api'], kwargs['table'], kwargs['headers'], 'all')[0]
         else:  # retrieve names and numbers of participants whose id was listed by user
             # since ids are retrieved from form as a space separated string
             # split the string by space and convert all resultant list items to int
-            names = meow.getData(
+            names = meow.get_data(
                 data['table-api'],
                 kwargs['table'],
                 kwargs['headers'],
@@ -175,7 +175,7 @@ def qr():
 
     # store the created webdriver object in browser dict
     # key - username of currently logged in user | value - webdriver object
-    browser[session['username']], qr_img = meow.startWebSession(data['browser'], data['driver-path'])
+    browser[session['username']], qr_img = meow.start_web_session(data['browser'], data['driver-path'])
 
     # the rendered HTML form, qr.html, automatically redirects to /send, which will load only once QR code is scanned,
     # the user is logged into whatsapp web and Hermes starts sending messages on whatsapp
@@ -187,7 +187,7 @@ def qr():
 @app.route('/send', methods=['POST', 'GET'])
 def send():
     # wait till the chat search box is loaded, so you know you're logged into whatsapp web
-    meow.waitTillElementLoaded(
+    meow.wait_till_element_loaded(
         browser[session['username']], '/html/body/div[1]/div/div/div[3]/div/div[1]/div/label/input'
     )
     print(session['username'], "logged into whatsapp")
@@ -207,11 +207,11 @@ def send_messages(**kwargs):
 
     try:
         # Get data from our API
-        # getData() returns two lists - first containing names and second containing numbers
+        # get_data() returns two lists - first containing names and second containing numbers
         if kwargs['ids'] == 'all':
-            names, numbers = meow.getData(data['table-api'], kwargs['table'], kwargs['headers'], 'all')
+            names, numbers = meow.get_data(data['table-api'], kwargs['table'], kwargs['headers'], 'all')
         else:
-            names, numbers = meow.getData(
+            names, numbers = meow.get_data(
                 data['table-api'],
                 kwargs['table'],
                 kwargs['headers'],
@@ -223,7 +223,7 @@ def send_messages(**kwargs):
             try:
                 # send message to number, and then append name + whatsapp api link to list of successes
                 messages_sent_to.append(
-                    meow.sendMessage(num, name, kwargs['msg'], browser[kwargs['username']], time=30)
+                    meow.send_message(num, name, kwargs['msg'], browser[kwargs['username']], time=30)
                 )
             except TimeoutException:  # if chat with participant couldn't be loaded in 30 seconds
                 print("chat could not be loaded for", name)
