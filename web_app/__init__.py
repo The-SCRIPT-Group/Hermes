@@ -66,7 +66,10 @@ def home():
 def login():
     # credentials for the API calls needs to be a base-64 encoded string in the format `username|password`
     # the credentials are sent in the header as value to the key `Credentials`
-    headers = {"Credentials": bs(str(request.form["username"] + "|" + request.form["password"]).encode())}
+    headers = {
+        "Credentials": bs(str(request.form["username"] + "|" + request.form["password"]).encode()),
+        "User-Agent": "Hermes/1.0",
+    }
 
     # POST call to `login-api` essentially returns status code 200 only if credentials are valid
     if post(url=data["login-api"], headers=headers, allow_redirects=False).status_code == 200:
