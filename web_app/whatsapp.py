@@ -10,14 +10,14 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 # url to open chat with someone in whatsapp web
 # append phone number of participant to the end of this string
-whatsapp_api = 'https://api.whatsapp.com/send?phone=91'
+whatsapp_api = "https://api.whatsapp.com/send?phone=91"
 
 # dict with list of functions for each browser
 # first function for creating web driver
 # second function for adding options to the created browser
 driver = {
-    'firefox': [webdriver.Firefox, webdriver.FirefoxOptions],
-    'chrome': [webdriver.Chrome, webdriver.ChromeOptions],
+    "firefox": [webdriver.Firefox, webdriver.FirefoxOptions],
+    "chrome": [webdriver.Chrome, webdriver.ChromeOptions],
 }
 
 
@@ -39,15 +39,15 @@ def get_data(url, table, headers, ids):
     numbers_list = []  # List of all numbers
 
     # Get data of participants from a certain event table
-    api_data = requests.get(url=url, params={'table': table}, headers=headers).json()
-    if ids != 'all':
+    api_data = requests.get(url=url, params={"table": table}, headers=headers).json()
+    if ids != "all":
         # select data of only those participants whose id is in the list of ids given as argument
-        api_data = [user for user in api_data if user['id'] in ids]
+        api_data = [user for user in api_data if user["id"] in ids]
 
     # Add names and numbers to respective lists
     for user in api_data:
-        names_list.append(user['name'])
-        numbers_list.append(user['phone'].split('|')[-1])
+        names_list.append(user["name"])
+        numbers_list.append(user["phone"].split("|")[-1])
 
     return names_list, numbers_list
 
@@ -65,18 +65,18 @@ def start_web_session(browser_type, driver_path):
     # create driver object with above options
     browser = driver[browser_type][0](executable_path=driver_path, options=options)
 
-    browser.get('https://web.whatsapp.com/')  # open whatsapp web in browser
-    print('whatsapp opened')
+    browser.get("https://web.whatsapp.com/")  # open whatsapp web in browser
+    print("whatsapp opened")
 
     # Get the qr code
 
     # wait till qr is loaded
-    wait_till_element_loaded(browser, '/html/body/div[1]/div/div/div[2]/div[1]/div/div[2]/div/canvas')
+    wait_till_element_loaded(browser, "/html/body/div[1]/div/div/div[2]/div[1]/div/div[2]/div/canvas")
     # retrieve qr code (base64 encoded image) from canvas
     qr = browser.execute_script(
         'return document.querySelector("#app > div > div > div.landing-window > div.landing-main > div > div.zCzor > div > canvas").toDataURL("image/png");'
     )
-    print('qr saved')
+    print("qr saved")
 
     return browser, qr  # returning the driver object and qr
 
@@ -99,7 +99,7 @@ def send_message(num, name, msg, browser, time=10000):
 
     wait_till_element_loaded(browser, "use WhatsApp Web", identifier=By.LINK_TEXT)  # wait till the link is loaded
     browser.find_element_by_link_text("use WhatsApp Web").click()  # click on link to open chat
-    print('opened chat')
+    print("opened chat")
 
     # Wait till the text box is loaded onto the screen, then type out and send the full message
 
@@ -118,8 +118,8 @@ def send_message(num, name, msg, browser, time=10000):
         emojize("\n- SCRIPT bot :robot_face:\n", use_aliases=True)
     )  # end note
 
-    print('sent')
+    print("sent")
 
     sleep(3)  # Just so that we can supervise, otherwise it's too fast
 
-    return name + ' : ' + api
+    return name + " : " + api
