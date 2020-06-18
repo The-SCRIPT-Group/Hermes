@@ -6,6 +6,7 @@ from collections import OrderedDict
 from threading import Thread
 
 import yaml
+from decouple import config
 from flask import Flask, render_template, session, request, url_for, redirect
 from requests import get, post
 from selenium.common.exceptions import TimeoutException
@@ -21,15 +22,18 @@ app.secret_key = 'messenger_of_the_gods'
 browser = {}
 
 # Get config data from json
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-if os.path.exists(os.path.join(BASE_DIR, 'data.json')):
-    with open(os.path.join(BASE_DIR, 'data.json'), 'r') as f:
-        data = json.load(f)
-elif os.path.exists(os.path.join(BASE_DIR, 'config.yml')):
-    with open(os.path.join(BASE_DIR, 'config.yml'), 'r') as f:
-        data = yaml.safe_load(f)
-else:
-    print("You don't have configuration JSON or YAML, go away")
+data = {}
+try:
+    data['table-api'] = config('table-api')
+    data['events-api'] = config('events-api')
+    data['login-api'] = config('login-api')
+    data['email-api'] = config('email-api')
+    data['browser'] = config('browser')
+    data['driver-path'] = config('driver-path')
+    data['log_channel'] = config('log_channel')
+    data['telebot_api_key'] = config('telebot_api_key')
+except Exception as e:
+    print(e)
     exit(1)
 
 tg = TG(data['telebot_api_key'])  # Object used to log data to telegram
