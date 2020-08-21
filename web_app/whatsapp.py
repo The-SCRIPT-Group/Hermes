@@ -60,7 +60,7 @@ def start_web_session(browser_type, driver_path):
         "user-agent=Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) "
         "Chrome/77.0.3865.120 Safari/537.36"
     )  # set user-agent to fool whatsapp web
-    # options.headless = True  # browser to be opened headless - server has no display
+    options.headless = True  # browser to be opened headless - server has no display
 
     # create driver object with above options
     browser = driver[browser_type][0](executable_path=driver_path, options=options)
@@ -74,7 +74,7 @@ def start_web_session(browser_type, driver_path):
     wait_till_element_loaded(browser, '/html/body/div[1]/div/div/div[2]/div[1]/div/div[2]/div/canvas')
     # retrieve qr code (base64 encoded image) from canvas
     qr = browser.execute_script(
-        'return document.querySelector("#app > div > div > div.landing-window > div.landing-main > div > div.zCzor > div > canvas").toDataURL("image/png");'
+        'return document.querySelector("html > body > div:nth-child(1) > div > div > div:nth-child(2) > div:nth-child(1) > div > div:nth-child(2) > div > canvas").toDataURL("image/png");'
     )
     print('qr saved')
 
