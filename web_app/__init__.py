@@ -142,7 +142,7 @@ def send_mail(**kwargs):
     # Get data from our API
     # get_data() returns two lists - first containing names and second containing numbers
     if kwargs['ids'] == 'all':  # retrieve names and numbers of all participants
-        names = meow.getData(data['table-api'], kwargs['table'], kwargs['headers'], 'all', kwargs['path'])[0]
+        names = meow.get_data(data['table-api'], kwargs['table'], kwargs['headers'], 'all', kwargs['path'])[0]
     else:  # retrieve names and numbers of participants whose id was listed by user
         # since ids are retrieved from form as a space separated string
         # split the string by space and convert all resultant list items to int
@@ -230,9 +230,9 @@ def send_messages(**kwargs):
         # Get data from our API
         # get_data() returns two lists - first containing names and second containing numbers
         if kwargs['ids'] == 'all':
-            names, numbers = meow.getData(data['table-api'], kwargs['table'], kwargs['headers'], 'all', kwargs['path'])
+            names, numbers = meow.get_data(data['table-api'], kwargs['table'], kwargs['headers'], 'all', kwargs['path'])
         else:
-            names, numbers = meow.getData(
+            names, numbers = meow.get_data(
                 data['table-api'],
                 kwargs['table'],
                 kwargs['headers'],

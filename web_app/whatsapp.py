@@ -29,7 +29,7 @@ def wait_till_element_loaded(browser, element, time=60, identifier=By.XPATH):
 
 
 # get all data of all participants from GET call to passed url
-def getData(url, table, headers, ids, path=""):
+def get_data(url, table, headers, ids, path=""):
     # url - GET call to this url will return data of all participants from a certain event table
     # table - the event table from which participant data is to be returned
     # headers - contain the credentials of currently logged in user as a base64 encoded string
