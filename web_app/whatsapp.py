@@ -78,7 +78,7 @@ def start_web_session(browser_type, driver_path):
     wait_till_element_loaded(browser, '/html/body/div[1]/div/div/div[2]/div[1]/div/div[2]/div/canvas')
     # retrieve qr code (base64 encoded image) from canvas
     qr = browser.execute_script(
-        'return document.querySelector("html > body > div:nth-child(1) > div > div > div:nth-child(2) > div:nth-child(1) > div > div:nth-child(2) > div > canvas").toDataURL("image/png");'
+        'return arguments[0].toDataURL("image/png");', browser.find_element_by_css_selector("canvas")
     )
     print('qr saved')
 
@@ -98,7 +98,7 @@ def send_message(num, name, msg, browser, time=10000):
     browser.get(api)  # Open url in browser
     print("opened whatsapp")
 
-    # wait_till_element_loaded(browser, '//*[@id="action-button"]')  # Wait till send message button is loaded
+    wait_till_element_loaded(browser, '//*[@id="action-button"]')  # Wait till send message button is loaded
     browser.find_element_by_xpath('//*[@id="action-button"]').click()  # Click on "send message" button
 
     wait_till_element_loaded(browser, "use WhatsApp Web", identifier=By.LINK_TEXT)  # wait till the link is loaded
