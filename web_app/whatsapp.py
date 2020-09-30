@@ -74,8 +74,6 @@ def start_web_session(browser_type, driver_path):
     browser.get('https://web.whatsapp.com/')  # open whatsapp web in browser
     print('whatsapp opened')
 
-    # Get the qr code
-
     # wait till qr is loaded
     wait_till_element_loaded(browser, '/html/body/div[1]/div/div/div[2]/div[1]/div/div[2]/div/canvas')
     # retrieve qr code (base64 encoded image) from canvas
@@ -112,8 +110,7 @@ def send_message(num, name, msg, browser, time=10000):
     xpath = "/html/body/div[1]/div/div/div[4]/div/footer/div[1]/div[2]/div/div[2]"  # xpath to text box
     wait_till_element_loaded(browser, xpath, time=time)  # wait till text box is loaded
 
-    browser.find_element_by_xpath(xpath).send_keys(
-        emojize(f"Hey {name} :wave:\n", use_aliases=True))  # welcome note
+    browser.find_element_by_xpath(xpath).send_keys(emojize(f"Hey {name} :wave:\n", use_aliases=True))  # welcome note
 
     browser.find_element_by_xpath(xpath).send_keys(msg[0])  # send part before any newlines
 
@@ -131,11 +128,13 @@ def send_message(num, name, msg, browser, time=10000):
 
     # delete the chat
     browser.find_element_by_xpath(
-        "/html/body/div[1]/div/div/div[4]/div/header/div[3]/div/div[3]").click()  # click on menu
+        "/html/body/div[1]/div/div/div[4]/div/header/div[3]/div/div[3]"
+    ).click()  # click on menu
     browser.find_element_by_xpath(
         "/html/body/div[1]/div/div/div[4]/div/header/div[3]/div/div[3]/span/div/ul/li[5]/div"
     ).click()  # click on delete option
     browser.find_element_by_xpath(
-        "/html/body/div[1]/div/span[2]/div/div/div/div/div/div/div[2]/div[2]").click()  # click on confirmation button
+        "/html/body/div[1]/div/span[2]/div/div/div/div/div/div/div[2]/div[2]"
+    ).click()  # click on confirmation button
 
     return name + ' : ' + api

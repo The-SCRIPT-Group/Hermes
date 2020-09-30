@@ -148,9 +148,10 @@ def send_mail(**kwargs):
         # split the string by space and convert all resultant list items to int
         names = meow.get_data(
             data['table-api'],
-            kwargs['table'], kwargs['headers'],
+            kwargs['table'],
+            kwargs['headers'],
             list(map(lambda x: int(x), kwargs['ids'].split(' '))),
-            kwargs['path']
+            kwargs['path'],
         )[0]
 
     if response.status_code == 200:
@@ -231,8 +232,13 @@ def send_messages(**kwargs):
         if kwargs['ids'] == 'all':
             names, numbers = meow.getData(data['table-api'], kwargs['table'], kwargs['headers'], 'all', kwargs['path'])
         else:
-            names, numbers = meow.getData(data['table-api'], kwargs['table'], kwargs['headers'],
-                                          list(map(lambda x: int(x), kwargs['ids'].strip().split(' '))), kwargs['path'])
+            names, numbers = meow.getData(
+                data['table-api'],
+                kwargs['table'],
+                kwargs['headers'],
+                list(map(lambda x: int(x), kwargs['ids'].strip().split(' '))),
+                kwargs['path'],
+            )
 
         # Send messages to all registrants
         for num, name in zip(numbers, names):

@@ -18,7 +18,11 @@ class TG:
 
         try:
             # POST call to telegram API
-            return manager.request("POST", f"https://api.telegram.org/bot{self.api_key}/{function}", fields=data,)
+            return manager.request(
+                "POST",
+                f"https://api.telegram.org/bot{self.api_key}/{function}",
+                fields=data,
+            )
         except ProtocolError as e:
             print(e, e.__class__)
             with open("extra-logs.txt", "a") as f:
@@ -54,7 +58,12 @@ class TG:
 
     # function to log a document to telegram channel
     def send_document(
-        self, chat_id, caption, file_name, disable_notifications=False, parse_mode="HTML",
+        self,
+        chat_id,
+        caption,
+        file_name,
+        disable_notifications=False,
+        parse_mode="HTML",
     ):
         # chat_id - ID of channel to which text message is to be logged
         # caption - the content of the text caption to be logged with the document
