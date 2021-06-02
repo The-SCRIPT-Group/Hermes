@@ -11,6 +11,6 @@ python-decouple==3.3
 PyYAML==5.4
 requests==2.23.0
 selenium==3.141.0
-urllib3==1.25.9
+urllib3==1.26.5
 waitress==1.4.4
 Werkzeug==1.0.1
